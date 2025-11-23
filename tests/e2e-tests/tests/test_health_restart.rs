@@ -2,6 +2,135 @@
 //!
 //! Tests that PROCMAN can detect when a managed process exits and restart it
 //! according to the configured restart policy.
+//!
+//! ## Test Scenario
+//!
+//! 1. Start TESTEXE configured to exit after 3 seconds
+//! 2. Wait for first instance to start and become healthy
+//! 3. Wait for process to exit (after 3 seconds)
+//! 4. Verify PROCMAN detects the exit
+//! 5. Verify restart policy triggers automatic restart
+//! 6. Wait for second instance to spawn
+//! 7. Verify restart counter incremented
+//! 8. Verify both instances logged spawn events
+//!
+//! ## Expected Results
+//!
+//! - First process instance starts successfully
+//! - Health checks pass for first instance
+//! - Process exits after 3 seconds (as configured)
+//! - Exit detected via exit monitor
+//! - Health check detects process no longer exists
+//! - Restart policy evaluates (should_restart = true)
+//! - Second process instance spawned automatically
+//! - Restart counter shows 1 restart
+//! - Process spawn count = 2 (original + 1 restart)
+//!
+//! ## Key Observations
+//!
+//! When examining test artifacts, look for:
+//!
+//! - ✅ First process spawn confirmation
+//! - ✅ Health checks passing for first instance
+//! - ✅ Exit monitor detects completion
+//! - ✅ Health check detects process is gone (no longer exists)
+//! - ✅ Restart policy evaluation (should_restart = true)
+//! - ✅ Restart callback invoked
+//! - ✅ Second process spawn confirmation
+//! - ✅ Restart counter incremented
+//! - ✅ Circuit breaker reset after successful restart
+//!
+//! ## Detailed Flow (Log Lines to Look For)
+//!
+//! ```
+//! [PROCMAN] Process spawned successfully: testexe (PID: 11111)
+//! [PROCMAN] Starting health monitor for testexe (type: Process)
+//! [PROCMAN] Health check loop started for testexe
+//! [PROCMAN] 💓 Process health check result: healthy=true
+//!
+//! [After 3 seconds - TESTEXE exits]
+//!
+//! [PROCMAN] Exit monitor completed for process testexe (PID: 11111)
+//! [PROCMAN] Process testexe (PID: 11111) exited successfully with code: 0
+//! [PROCMAN] 🔍 Running health check for testexe (PID: 11111)
+//! [PROCMAN] ❌ Process no longer exists for PID 11111
+//! [PROCMAN] 🚨 Health check failure threshold reached for testexe
+//! [PROCMAN] 📞 Calling restart callback for testexe
+//! [PROCMAN] 🔧 Restart policy check: should_restart=true
+//! [PROCMAN] ✅ Restart allowed, queueing restart request
+//!
+//! [PROCMAN] 🔄 Processing restart request for testexe (trigger: HealthFailure)
+//! [PROCMAN] Restarting process control: testexe
+//! [PROCMAN] Process spawned successfully: testexe (PID: 22222)
+//! [PROCMAN] ✅ Automatic restart succeeded
+//! [PROCMAN] Circuit breaker reset
+//!
+//! Process spawn count: 2 ✅
+//! ```
+//!
+//! ## Framework Validation
+//!
+//! This test confirms that:
+//!
+//! 1. **Exit detection works** - Exit monitor captures process termination
+//! 2. **Health checks detect exit** - Health monitor realizes process is gone
+//! 3. **Restart policy works** - "on-failure" policy triggers restart
+//! 4. **Automatic restart works** - New instance spawned without manual intervention
+//! 5. **Restart counter works** - Tracks number of restarts
+//! 6. **Circuit breaker resets** - State cleaned for new instance
+//! 7. **State machine transitions** - Running → Failed → Starting → Running
+//!
+//! ## Restart Policy Configuration
+//!
+//! ```yaml
+//! management:
+//!   standard_managed:
+//!     control:
+//!       restart_policy: "on-failure"  # Restart when process exits
+//!       context_aware_restart:
+//!         default:
+//!           max_retries: 5            # Allow up to 5 restart attempts
+//!           retry_delay: 1s           # Wait 1 second before restarting
+//!           backoff_rate: 1.0         # Linear backoff (no increase)
+//! ```
+//!
+//! ## TESTEXE Configuration
+//!
+//! The test executable is configured to:
+//! - Run for 3 seconds (`--run-duration 3`)
+//! - Exit cleanly with code 0
+//! - Simulate a process that completes its work and exits
+//!
+//! This mimics a real-world scenario where:
+//! - A worker process completes a task
+//! - Process exits normally
+//! - But you want it restarted to handle the next task
+//!
+//! ## Test Artifacts
+//!
+//! Test runs preserve artifacts in timestamped directories:
+//!
+//! ```
+//! target/debug/tmp/e2e-test-health-restart/run-TIMESTAMP/
+//! ├── config.yaml      # Test configuration with restart policy
+//! └── procman.log      # Process manager logs with restart sequence
+//! ```
+//!
+//! View restart sequence:
+//! ```bash
+//! cat target/debug/tmp/e2e-test-health-restart/run-*/procman.log | grep -E "spawned|Exit monitor|restart"
+//! ```
+//!
+//! Count restarts:
+//! ```bash
+//! cat target/debug/tmp/e2e-test-health-restart/run-*/procman.log | grep "Process spawned" | wc -l
+//! # Should show 2 (original + 1 restart)
+//! ```
+//!
+//! View restart policy evaluation:
+//! ```bash
+//! cat target/debug/tmp/e2e-test-health-restart/run-*/procman.log | grep "Restart policy"
+//! ```
 
 use e2e_tests::TestExecutor;
 use e2e_tests::process_manager::TestConfigOptions;

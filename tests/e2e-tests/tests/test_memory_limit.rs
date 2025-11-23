@@ -2,6 +2,156 @@
 //!
 //! Tests that PROCMAN can detect when a managed process exceeds memory limits
 //! and take the configured action (warn, restart, terminate).
+//!
+//! ## Test Scenario
+//!
+//! 1. Start TESTEXE configured to allocate 150MB memory
+//! 2. Configure memory limit to 100MB (below allocation)
+//! 3. Configure policy to "restart" on violation
+//! 4. Wait for process to start and allocate memory
+//! 5. Wait for resource monitoring to detect violation
+//! 6. Verify violation triggers restart
+//! 7. Verify new instance spawned
+//! 8. Verify restart counter incremented
+//!
+//! ## Expected Results
+//!
+//! - Process starts successfully
+//! - Memory allocation occurs (150MB)
+//! - Resource monitor detects memory usage
+//! - Memory exceeds configured limit (100MB)
+//! - Violation detected and logged
+//! - Restart policy triggers automatic restart
+//! - Process terminated and restarted
+//! - Second instance spawned
+//! - Process spawn count = 2 (original + 1 restart)
+//!
+//! ## Key Observations
+//!
+//! When examining test artifacts, look for:
+//!
+//! - ✅ Process spawn confirmation
+//! - ✅ Resource monitoring started (CPU/memory tracking)
+//! - ✅ Memory usage reported in logs
+//! - ✅ Memory limit violation detected (usage > limit)
+//! - ✅ Violation policy = "restart"
+//! - ✅ Process terminated due to resource violation
+//! - ✅ Restart triggered automatically
+//! - ✅ Second instance spawned
+//! - ✅ Resource monitor restarted for new instance
+//!
+//! ## Detailed Flow (Log Lines to Look For)
+//!
+//! ```
+//! [PROCMAN] Process spawned successfully: testexe (PID: 11111)
+//! [PROCMAN] Starting health monitor for testexe (type: Process)
+//! [PROCMAN] Spawning resource monitor task for testexe (PID: 11111)
+//! [PROCMAN] 💓 Process health check result: healthy=true
+//!
+//! [After memory allocation]
+//!
+//! [PROCMAN] 📊 Resource usage for testexe (PID: 11111):
+//!           CPU: X.X%, Memory: 150.XMB, FDs: X
+//! [PROCMAN] ⚠️ Memory limit violation for testexe:
+//!           usage=150.XMB, limit=100.0MB, policy=restart
+//! [PROCMAN] 🔄 Triggering restart for testexe due to resource violation
+//!
+//! [PROCMAN] Restarting process control: testexe (force: true)
+//! [PROCMAN] Stopping process control: testexe
+//! [PROCMAN] Terminating process: testexe
+//! [PROCMAN] Process terminated: testexe
+//!
+//! [PROCMAN] Process spawned successfully: testexe (PID: 22222)
+//! [PROCMAN] Spawning resource monitor task for testexe (PID: 22222)
+//! [PROCMAN] ✅ Automatic restart succeeded
+//!
+//! Process spawn count: 2 ✅
+//! ```
+//!
+//! ## Framework Validation
+//!
+//! This test confirms that:
+//!
+//! 1. **Resource monitoring works** - CPU/memory tracking via sysinfo
+//! 2. **Limit enforcement works** - Violations detected accurately
+//! 3. **Policy application works** - "restart" policy triggers restart
+//! 4. **Automatic restart works** - New instance spawned after violation
+//! 5. **State cleanup works** - Old process terminated before restart
+//! 6. **Continuous monitoring** - Resource monitor restarts for new instance
+//!
+//! ## Resource Limit Configuration
+//!
+//! ```yaml
+//! resource_limits:
+//!   limits:
+//!     memory:
+//!       limit_mb: 100          # Maximum memory allowed
+//!       policy: "restart"      # Action on violation
+//!   monitoring:
+//!     enabled: true
+//!     interval: 2s             # Check every 2 seconds
+//! ```
+//!
+//! ## Policy Options
+//!
+//! - **log**: Log violation but take no action (warning only)
+//! - **restart**: Terminate and restart the process
+//! - **terminate**: Terminate the process (no restart)
+//!
+//! ## TESTEXE Memory Behavior
+//!
+//! The test executable is configured with:
+//! - `--memory-mb 150` - Allocate 150MB of memory
+//! - `--run-duration 15` - Keep running for 15 seconds
+//!
+//! This simulates a process that:
+//! - Has a memory leak or high memory usage
+//! - Exceeds configured limits
+//! - Needs to be restarted to reclaim resources
+//!
+//! ## Platform-Specific Notes
+//!
+//! ### Memory Reporting
+//!
+//! - **Linux**: Uses `/proc/[pid]/status` (VmRSS - Resident Set Size)
+//! - **macOS**: Uses `proc_pidinfo()` with `PROC_PIDTASKINFO`
+//! - **Windows**: Uses `GetProcessMemoryInfo()` (WorkingSetSize)
+//!
+//! ### Accuracy
+//!
+//! - Memory reporting has ~1-2 second lag
+//! - Resource monitor checks every 2 seconds by default
+//! - Violation detection may take 2-4 seconds
+//!
+//! ## Test Artifacts
+//!
+//! Test runs preserve artifacts in timestamped directories:
+//!
+//! ```
+//! target/debug/tmp/e2e-test-memory-limit/run-TIMESTAMP/
+//! ├── config.yaml      # Test configuration with memory limits
+//! └── procman.log      # Process manager logs with resource monitoring
+//! ```
+//!
+//! View resource monitoring:
+//! ```bash
+//! cat target/debug/tmp/e2e-test-memory-limit/run-*/procman.log | grep "Resource usage"
+//! ```
+//!
+//! View violations:
+//! ```bash
+//! cat target/debug/tmp/e2e-test-memory-limit/run-*/procman.log | grep "violation"
+//! ```
+//!
+//! Count restarts:
+//! ```bash
+//! cat target/debug/tmp/e2e-test-memory-limit/run-*/procman.log | grep "Process spawned" | wc -l
+//! ```
+//!
+//! ## Additional Tests in This File
+//!
+//! - `test_memory_growth` - Observes memory growth without violations (log only)
+//! - `test_cpu_limit` - Tests CPU monitoring (observation only, no enforcement yet)
 
 use e2e_tests::TestExecutor;
 use e2e_tests::process_manager::TestConfigOptions;
@@ -28,6 +178,7 @@ fn test_memory_limit_violation() {
         log_dir: None,
         memory_limit_mb: Some(100),  // Set limit to 100MB (below allocation)
         memory_policy: Some("restart".to_string()),  // Restart on violation
+        ..Default::default()
     };
     
     let result = executor.run_test(config, |procman| {
@@ -186,6 +337,7 @@ fn test_memory_growth_violation() {
         log_dir: None,
         memory_limit_mb: None,
         memory_policy: None,
+        ..Default::default()
     };
     
     let result = executor.run_test(config, |procman| {
@@ -240,6 +392,7 @@ fn test_cpu_limit_warning() {
         log_dir: None,
         memory_limit_mb: None,
         memory_policy: None,
+        ..Default::default()
     };
     
     let result = executor.run_test(config, |procman| {

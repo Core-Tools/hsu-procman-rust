@@ -2,6 +2,96 @@
 //!
 //! Tests that PROCMAN can gracefully shut down managed processes by sending
 //! termination signals and waiting for them to exit cleanly.
+//!
+//! ## Test Scenario
+//!
+//! 1. Start TESTEXE as a managed process
+//! 2. Wait for process to be running and healthy
+//! 3. Let process run for 2 seconds (verify stability)
+//! 4. Send SIGTERM signal via PROCMAN API
+//! 5. Verify process exits cleanly within timeout
+//! 6. Verify PROCMAN shuts down gracefully
+//!
+//! ## Expected Results
+//!
+//! - Process starts successfully and becomes healthy
+//! - Process runs stably for several seconds
+//! - SIGTERM signal sent successfully
+//! - Process terminates within graceful timeout (5 seconds)
+//! - No forced kill required
+//! - Exit status captured correctly
+//! - PROCMAN shuts down cleanly
+//!
+//! ## Key Observations
+//!
+//! When examining test artifacts, look for:
+//!
+//! - ✅ Process spawn confirmation
+//! - ✅ Health checks passing (process is stable)
+//! - ✅ Termination signal sent (SIGTERM or taskkill /t on Windows)
+//! - ✅ Graceful shutdown initiated
+//! - ✅ Process terminated successfully message
+//! - ✅ NO "force kill" or "timeout" messages
+//! - ✅ Exit monitor completion
+//!
+//! ## Detailed Flow (Log Lines to Look For)
+//!
+//! ```
+//! [PROCMAN] Process spawned successfully: testexe (PID: XXXXX)
+//! [PROCMAN] Starting health monitor for testexe (type: Process)
+//! [PROCMAN] Health check loop started for testexe
+//! [PROCMAN] 💓 Process health check result: healthy=true
+//!
+//! [Test sends shutdown signal]
+//!
+//! [PROCMAN] Stopping process control: testexe
+//! [PROCMAN] Terminating process: testexe
+//! [PROCMAN] Sending termination signal to PID XXXXX
+//! [PROCMAN] Process terminated: testexe
+//! [PROCMAN] Exit monitor completed for process testexe
+//! ```
+//!
+//! ## Framework Validation
+//!
+//! This test confirms that:
+//!
+//! 1. **Graceful shutdown works** - Processes can be stopped cleanly
+//! 2. **Signal handling is correct** - SIGTERM (Unix) / taskkill (Windows) work
+//! 3. **Timeout mechanism works** - Waits for graceful exit before force kill
+//! 4. **State transitions are correct** - Running → Stopping → Stopped
+//! 5. **No resource leaks** - Process cleanup is complete
+//!
+//! ## Platform Differences
+//!
+//! ### Linux/macOS
+//! - Uses POSIX signals: `SIGTERM` (15)
+//! - Process can handle signal gracefully
+//! - Default 5 second timeout before `SIGKILL` (9)
+//!
+//! ### Windows
+//! - Uses `taskkill /t /pid XXXXX` (terminate process tree)
+//! - Sends `WM_CLOSE` to console applications
+//! - Falls back to `taskkill /f` (force) if timeout exceeded
+//!
+//! ## Test Artifacts
+//!
+//! Test runs preserve artifacts in timestamped directories:
+//!
+//! ```
+//! target/debug/tmp/e2e-test-graceful-stop/run-TIMESTAMP/
+//! ├── config.yaml      # Test configuration
+//! └── procman.log      # Process manager logs
+//! ```
+//!
+//! View shutdown sequence:
+//! ```bash
+//! cat target/debug/tmp/e2e-test-graceful-stop/run-*/procman.log | grep -E "Stopping|Terminating|terminated"
+//! ```
+//!
+//! Verify no force kills:
+//! ```bash
+//! cat target/debug/tmp/e2e-test-graceful-stop/run-*/procman.log | grep -i "force" || echo "✓ No force kills"
+//! ```
 
 use e2e_tests::TestExecutor;
 use e2e_tests::process_manager::TestConfigOptions;

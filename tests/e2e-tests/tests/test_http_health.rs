@@ -2,6 +2,120 @@
 //!
 //! Tests that PROCMAN can detect when a managed process becomes unhealthy via
 //! HTTP health checks and restart it according to the configured restart policy.
+//!
+//! ## Test Scenario
+//!
+//! 1. Start TESTEXE with HTTP health server (port 18080)
+//! 2. Configure to fail health checks after 5 seconds
+//! 3. Wait for initial health checks to pass
+//! 4. Wait for health to start failing (returns 503)
+//! 5. Verify restart triggered after 3 consecutive failures
+//! 6. Verify new instance spawned (spawn count = 2+)
+//!
+//! ## Expected Results
+//!
+//! - HTTP server starts in TESTEXE
+//! - Health checks execute every 3 seconds
+//! - HTTP health endpoint responds (200 OK → 503 Unhealthy)
+//! - Failure detection works (3 consecutive failures)
+//! - Restart callback triggered correctly
+//! - Process restarted successfully
+//! - Second instance spawned
+//! - Circuit breaker reset on recovery
+//!
+//! ## Key Observations
+//!
+//! When examining test artifacts, look for:
+//!
+//! - ✅ HTTP health endpoint configuration logged
+//! - ✅ Health check interval and threshold logged
+//! - ✅ Initial successful health checks (200 OK responses)
+//! - ✅ Health checks starting to fail (503 Service Unavailable)
+//! - ✅ Consecutive failure counter incrementing (1/3, 2/3, 3/3)
+//! - ✅ Failure threshold reached trigger
+//! - ✅ Restart callback invoked
+//! - ✅ Process termination and new spawn
+//! - ✅ Multiple process spawn log entries confirming restart
+//!
+//! ## Detailed Flow (Log Lines to Look For)
+//!
+//! ```
+//! [19:00:01] Process spawned successfully: testexe (PID: 30900)
+//! [19:00:01] Starting health monitor for testexe (type: Http)
+//! [19:00:01] HTTP health check endpoint: http://127.0.0.1:18080/
+//! [19:00:01] Health check loop started for testexe (interval: 3s, threshold: 3)
+//!
+//! [19:00:04] ❌ Health check failed: consecutive failures = 1/3
+//!            reason: Unexpected status code: 503 Service Unavailable
+//! [19:00:07] ❌ Health check failed: consecutive failures = 2/3
+//! [19:00:07] ❌ Health check failed: consecutive failures = 3/3
+//! [19:00:07] 🚨 Health check failure threshold reached for testexe
+//! [19:00:07] 📞 Calling restart callback for testexe
+//! [19:00:07] ✅ Restart allowed, queueing restart request
+//!
+//! [19:00:09] 🔄 Processing restart request (trigger: HealthFailure)
+//! [19:00:09] Terminating process: PID 30900
+//! [19:00:11] Process spawned successfully: testexe (PID: 32756)
+//! [19:00:11] Health monitor started
+//! [19:00:11] ✅ Automatic restart succeeded
+//!
+//! Process spawn count: 2 ✅
+//! ```
+//!
+//! ## Framework Validation
+//!
+//! This test confirms that:
+//!
+//! 1. **HTTP health checks work end-to-end** - Real HTTP server + health check client
+//! 2. **Health failure detection is accurate** - Consecutive failure tracking works
+//! 3. **Restart policy triggers correctly** - Health failure → restart request → restart
+//! 4. **Process lifecycle management works** - Terminate old, spawn new, reset state
+//! 5. **Circuit breaker resets properly** - New instance starts with clean state
+//!
+//! ## TESTEXE HTTP Server Behavior
+//!
+//! The test executable runs an HTTP server that:
+//!
+//! - **Port:** 18080 (configurable via `--health-port`)
+//! - **Endpoint:** `/health` (not `/` to avoid confusion)
+//! - **Initial Response:** `200 OK` with body "OK\n"
+//! - **After 5 seconds:** `503 Service Unavailable` with body "Unhealthy\n"
+//!
+//! This simulates a real service that becomes unhealthy over time.
+//!
+//! ## Health Check Configuration
+//!
+//! ```yaml
+//! health_check:
+//!   type: "http"
+//!   run_options:
+//!     enabled: true
+//!     interval: 3000ms         # Check every 3 seconds
+//!     timeout: 2000ms          # HTTP request timeout (must be < interval)
+//!     failure_threshold: 3     # Restart after 3 consecutive failures
+//!     recovery_threshold: 2    # Mark healthy after 2 consecutive successes
+//!     http_endpoint: "http://127.0.0.1:18080/health"
+//! ```
+//!
+//! ## Test Artifacts
+//!
+//! Test runs preserve artifacts in timestamped directories:
+//!
+//! ```
+//! target/debug/tmp/e2e-test-http-health-restart/run-TIMESTAMP/
+//! ├── config.yaml      # Test configuration with HTTP health check
+//! └── procman.log      # Process manager logs with health check activity
+//! ```
+//!
+//! View health check activity:
+//! ```bash
+//! cat target/debug/tmp/e2e-test-http-health-restart/run-*/procman.log | grep "Health check"
+//! ```
+//!
+//! Count restarts:
+//! ```bash
+//! cat target/debug/tmp/e2e-test-http-health-restart/run-*/procman.log | grep "Process spawned" | wc -l
+//! ```
 
 use e2e_tests::TestExecutor;
 use e2e_tests::process_manager::TestConfigOptions;
@@ -30,8 +144,8 @@ fn test_http_health_restart() {
         // Enable HTTP health checks
         health_check_type: Some("http".to_string()),
         health_check_endpoint: Some("http://127.0.0.1:18080/".to_string()),
-        health_check_interval_ms: Some(2000),  // Check every 2 seconds
-        health_check_timeout_ms: Some(3000),
+        health_check_interval_ms: Some(3000),  // Check every 3 seconds
+        health_check_timeout_ms: Some(2000),  // Timeout must be less than interval
         health_check_failure_threshold: Some(3),
         ..Default::default()
     };

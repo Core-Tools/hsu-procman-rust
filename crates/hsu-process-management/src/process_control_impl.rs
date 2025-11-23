@@ -43,6 +43,7 @@ use hsu_resource_limits::{
     ResourceMonitor, ResourceUsage,
     check_resource_limits_with_policy, ResourcePolicy, ResourceViolation,
 };
+use hsu_log_collection::{LogCollectionService, StreamType};
 use std::sync::Arc;
 use tokio::process::{Child, Command};
 use tokio::sync::{RwLock, Mutex};
@@ -113,6 +114,9 @@ pub struct ProcessControlImpl {
     #[allow(dead_code)]
     last_exit_status: Option<std::process::ExitStatus>,
     
+    /// Log collection service (optional)
+    log_collection_service: Option<Arc<LogCollectionService>>,
+    
     /// Restart request channel (for health checks and resource violations to trigger restarts)
     restart_tx: tokio::sync::mpsc::UnboundedSender<RestartRequest>,
     restart_rx: Arc<Mutex<tokio::sync::mpsc::UnboundedReceiver<RestartRequest>>>,
@@ -166,6 +170,9 @@ impl ProcessControlImpl {
         // Create restart request channel
         let (restart_tx, restart_rx) = tokio::sync::mpsc::unbounded_channel();
         
+        // Extract log collection service before moving control_config
+        let log_collection_service = control_config.log_collection_service.clone();
+        
         Self {
             config,
             control_config,
@@ -192,6 +199,7 @@ impl ProcessControlImpl {
             exit_monitor_task: None,
             restart_handler_task: None,
             last_exit_status: None,
+            log_collection_service,
             restart_tx,
             restart_rx: Arc::new(Mutex::new(restart_rx)),
             last_error: None,
@@ -246,8 +254,14 @@ impl ProcessControlImpl {
         
         // Spawn the process (spawn is synchronous, returns Result)
         match cmd.spawn() {
-            Ok(child) => {
+            Ok(mut child) => {
                 let pid = child.id().unwrap_or(0);
+                
+                // Capture stdout/stderr for log collection before moving child
+                if let Some(ref log_service) = self.log_collection_service {
+                    self.spawn_log_collection_tasks(&mut child, log_service);
+                }
+                
                 self.child = Some(child);
                 self.pid = Some(pid);
                 self.start_time = Some(chrono::Utc::now());
@@ -269,6 +283,49 @@ impl ProcessControlImpl {
                 })
             }
         }
+    }
+    
+    /// Spawn log collection tasks for stdout/stderr
+    fn spawn_log_collection_tasks(&self, child: &mut Child, log_service: &Arc<LogCollectionService>) {
+        let process_id = self.config.id.clone();
+        
+        // Take stdout (if available)
+        if let Some(stdout) = child.stdout.take() {
+            let log_service = Arc::clone(log_service);
+            let process_id_clone = process_id.clone();
+            
+            tokio::spawn(async move {
+                if let Err(e) = log_service.collect_from_stream(
+                    &process_id_clone,
+                    stdout,
+                    StreamType::Stdout,
+                ).await {
+                    warn!("Failed to collect stdout for {}: {}", process_id_clone, e);
+                }
+            });
+            
+            debug!("Stdout log collection started for {}", process_id);
+        }
+        
+        // Take stderr (if available)
+        if let Some(stderr) = child.stderr.take() {
+            let log_service = Arc::clone(log_service);
+            let process_id_clone = process_id.clone();
+            
+            tokio::spawn(async move {
+                if let Err(e) = log_service.collect_from_stream(
+                    &process_id_clone,
+                    stderr,
+                    StreamType::Stderr,
+                ).await {
+                    warn!("Failed to collect stderr for {}: {}", process_id_clone, e);
+                }
+            });
+            
+            debug!("Stderr log collection started for {}", process_id);
+        }
+        
+        info!("Log collection tasks spawned for {}", process_id);
     }
     
     /// Terminate the running process

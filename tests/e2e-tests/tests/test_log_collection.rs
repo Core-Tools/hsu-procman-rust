@@ -2,6 +2,73 @@
 //!
 //! Tests that PROCMAN captures stdout and stderr from managed processes
 //! and writes them to log files.
+//!
+//! ## Test Scenario
+//!
+//! 1. Start TESTEXE with log collection enabled
+//! 2. Wait for process to start
+//! 3. Wait for process to produce output
+//! 4. Check for log directory creation
+//! 5. Graceful shutdown
+//!
+//! ## Expected Results
+//!
+//! - Process starts successfully
+//! - TESTEXE produces output (visible in PROCMAN logs)
+//! - Test framework works correctly
+//! - Log directory created (when full integration complete)
+//! - Graceful shutdown works
+//!
+//! ## Key Observations
+//!
+//! When examining test artifacts, look for:
+//!
+//! - ✅ Process spawn confirmation in PROCMAN logs
+//! - ✅ Health check activity indicating process is running
+//! - ✅ TESTEXE output visible in process manager logs
+//! - ⏳ Log files created in configured directory (pending full integration)
+//! - ✅ Clean shutdown without errors
+//!
+//! ## Detailed Flow (Log Lines to Look For)
+//!
+//! ```
+//! [PROCMAN] Process spawned successfully: testexe (PID: XXXXX)
+//! [PROCMAN] Starting health monitor for testexe (type: Process)
+//! [PROCMAN] Health check loop started for testexe (PID: XXXXX, interval: 1s)
+//! [PROCMAN] 🔍 Running health check for testexe
+//! [PROCMAN] 💓 Process health check result for testexe: healthy=true
+//! [TESTEXE] (output appears in process manager logs)
+//! [PROCMAN] Process control stopped successfully: testexe
+//! ```
+//!
+//! ## Framework Validation
+//!
+//! This test confirms that:
+//!
+//! 1. **Process spawning works** - PROCMAN can start TESTEXE
+//! 2. **Stdout/stderr capture infrastructure is in place** - Streams are captured after spawn
+//! 3. **Log collection service can be integrated** - Architecture supports service injection
+//! 4. **Test assertions validate expected behavior** - Framework can verify outcomes
+//!
+//! ## Test Artifacts
+//!
+//! Test runs preserve artifacts in timestamped directories:
+//!
+//! ```
+//! target/debug/tmp/e2e-test-log-collection/run-TIMESTAMP/
+//! ├── config.yaml      # Test configuration
+//! └── procman.log      # Process manager logs
+//! ```
+//!
+//! View logs:
+//! ```bash
+//! cat target/debug/tmp/e2e-test-log-collection/run-*/procman.log | grep "spawned"
+//! ```
+//!
+//! ## Current Status
+//!
+//! **Framework Ready** - Test validates infrastructure is in place.
+//! **Integration Pending** - Full log collection service wiring (~1-2 hours remaining).
 
 use e2e_tests::TestExecutor;
 use e2e_tests::process_manager::TestConfigOptions;
