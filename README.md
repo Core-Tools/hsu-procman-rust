@@ -1,5 +1,7 @@
 ﻿# HSU Process Manager - Rust Implementation
 
+[![CI](https://github.com/Core-Tools/hsu-procman-rust/actions/workflows/ci.yml/badge.svg)](https://github.com/Core-Tools/hsu-procman-rust/actions/workflows/ci.yml)
+
 ---
 
 ## Overview
@@ -215,10 +217,16 @@ cargo test --package e2e-tests -- --nocapture --test-threads=1
 
 ### Test Results
 
-**Status:** ✅ **100% Passing (4/4 tests)**
-- **Windows:** All tests passing (~30s total)
-- **Linux (WSL2):** All tests passing (~32s total)
-- **macOS:** Not yet tested
+**Status:** ✅ **100% Passing (4/4 tests)** - **ALL PLATFORMS** 🎉
+
+| Platform | Status | Duration | CI Status |
+|----------|--------|----------|-----------|
+| **Windows Server 2022** | ✅ Passing | ~30s | Automated via GitHub Actions |
+| **Linux (Ubuntu 22.04)** | ✅ Passing | ~32s | Automated via GitHub Actions |
+| **macOS 13 (Intel)** | ✅ Passing | ~4 min | Automated via GitHub Actions |
+| **macOS 14 (Apple Silicon)** | ✅ Passing | ~4 min | Automated via GitHub Actions |
+
+**CI/CD:** Automated testing runs on every push and pull request via [GitHub Actions](https://github.com/Core-Tools/hsu-procman-rust/actions)
 
 ### Test Artifacts
 
@@ -353,10 +361,13 @@ find target/tmp/ -type d -name "run-*" -mtime +7 -exec rm -rf {} +
 - **Resource Monitoring:** procfs via sysinfo
 - **Tests:** All 4/4 E2E tests passing
 
-### macOS ⏳
-- **Status:** Not yet tested
-- **Expected:** Should work (BSD-based, similar to Linux)
-- **Next Step:** Run E2E tests on macOS to verify
+### macOS ✅
+- **Status:** Fully tested and working (CI validated on macOS 13 & 14)
+- **Process APIs:** fork/exec, kill, waitpid (BSD/POSIX)
+- **Signals:** SIGTERM, SIGKILL (full POSIX support)
+- **Resource Monitoring:** sysctl/libproc via sysinfo
+- **Tests:** All 4/4 E2E tests passing on both Intel and Apple Silicon
+- **CI/CD:** Automated testing via GitHub Actions
 
 ---
 
