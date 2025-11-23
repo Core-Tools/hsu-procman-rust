@@ -1,0 +1,156 @@
+name: CI
+
+# When to run this workflow
+on:
+  push:
+    branches:
+      - main      # Run on pushes to main branch
+      - develop   # Run on pushes to develop branch (if you have one)
+  pull_request:
+    branches:
+      - main      # Run on PRs to main
+      - develop   # Run on PRs to develop (if you have one)
+  workflow_dispatch:  # Allow manual trigger from GitHub UI
+
+# Cancel previous runs if a new push/PR comes in
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Environment variables for all jobs
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+# Define the jobs
+jobs:
+  # Job 1: Build and test on all platforms
+  build-and-test:
+    name: Build & Test (${{ matrix.os }})
+    
+    # Matrix strategy: run on multiple OS
+    strategy:
+      fail-fast: false  # Continue testing other OS even if one fails
+      matrix:
+        include:
+          # Linux
+          - os: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+            
+          # Windows
+          - os: windows-2022
+            target: x86_64-pc-windows-msvc
+            
+          # macOS (Intel)
+          - os: macos-13
+            target: x86_64-apple-darwin
+            
+          # macOS (Apple Silicon M1/M2)
+          - os: macos-14
+            target: aarch64-apple-darwin
+    
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+      # Step 1: Check out the repository code
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      # Step 2: Install Rust toolchain
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      
+      # Step 3: Cache cargo dependencies (speeds up builds)
+      # Note: continue-on-error for macOS to workaround https://github.com/actions/runner/issues/449
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        continue-on-error: ${{ runner.os == 'macOS' }}
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-registry-
+      
+      - name: Cache cargo index
+        uses: actions/cache@v4
+        continue-on-error: ${{ runner.os == 'macOS' }}
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-git-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-git-
+      
+      - name: Cache cargo build
+        uses: actions/cache@v4
+        continue-on-error: ${{ runner.os == 'macOS' }}
+        with:
+          path: target
+          key: ${{ runner.os }}-cargo-build-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-build-
+      
+      # Step 4: Check code formatting
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+      
+      # Step 5: Run Clippy (Rust linter)
+      - name: Run Clippy
+        run: cargo clippy --workspace --all-targets --all-features -- -D warnings
+      
+      # Step 6: Build the workspace
+      - name: Build workspace
+        run: cargo build --workspace --verbose
+      
+      # Step 7: Run unit tests
+      - name: Run unit tests
+        run: cargo test --workspace --lib --verbose
+      
+      # Step 8: Build test executable
+      - name: Build test executable
+        run: cargo build -p testexe --verbose
+      
+      # Step 9: Run E2E tests
+      - name: Run E2E tests
+        run: cargo test --package e2e-tests --verbose -- --nocapture --test-threads=1
+        timeout-minutes: 10  # Timeout after 10 minutes
+      
+      # Step 10: Upload test artifacts if tests fail
+      - name: Upload test artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-logs-${{ matrix.os }}-${{ github.sha }}
+          path: target/tmp/
+          retention-days: 7
+      
+      # Step 11: Build release binary (optional, for verification)
+      - name: Build release binary
+        run: cargo build --release -p hsu-process-manager --verbose
+      
+      # Step 12: Upload release binary as artifact (optional)
+      - name: Upload release binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: hsu-process-manager-${{ matrix.os }}-${{ github.sha }}
+          path: |
+            target/release/hsu-process-manager${{ matrix.os == 'windows-2022' && '.exe' || '' }}
+          retention-days: 7
+
+  # Job 2: Summary job (runs after all builds complete)
+  ci-success:
+    name: CI Success
+    needs: [build-and-test]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - name: Check build results
+        run: |
+          if [ "${{ needs.build-and-test.result }}" != "success" ]; then
+            echo "❌ Build and test failed on one or more platforms"
+            exit 1
+          fi
+          echo "✅ All builds and tests passed!"
+
