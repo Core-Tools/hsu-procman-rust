@@ -703,50 +703,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "hsu-module-api"
-version = "0.1.0"
-dependencies = [
- "async-trait",
- "hsu-common",
- "hsu-module-management",
- "hsu-module-proto",
- "http-body-util",
- "hyper 1.7.0",
- "hyper-util",
- "lazy_static",
- "serde",
- "serde_json",
- "tokio",
- "tonic",
- "tracing",
-]
-
-[[package]]
-name = "hsu-module-management"
-version = "0.1.0"
-dependencies = [
- "async-trait",
- "hsu-common",
- "thiserror",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "hsu-module-proto"
-version = "0.1.0"
-dependencies = [
- "async-trait",
- "hsu-common",
- "hsu-module-management",
- "prost",
- "tokio",
- "tokio-stream",
- "tonic",
- "tracing",
-]
-
-[[package]]
 name = "hsu-monitoring"
 version = "0.1.0"
 dependencies = [
@@ -862,23 +818,6 @@ dependencies = [
  "thiserror",
  "tokio",
  "tracing",
-]
-
-[[package]]
-name = "hsu-service-registry"
-version = "0.1.0"
-dependencies = [
- "axum 0.7.9",
- "chrono",
- "dashmap",
- "hsu-common",
- "serde",
- "serde_json",
- "tempfile",
- "tokio",
- "tower 0.4.13",
- "tracing",
- "tracing-subscriber",
 ]
 
 [[package]]

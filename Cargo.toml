@@ -5,12 +5,6 @@ members = [
     # Common/shared crates
     "crates/hsu-common",
     
-    # Module communication crates
-    "crates/hsu-module-management",
-    "crates/hsu-module-api",
-    "crates/hsu-module-proto",
-    "crates/hsu-service-registry",
-    
     # Process management crates (libraries)
     "crates/hsu-process-state",
     "crates/hsu-process",
