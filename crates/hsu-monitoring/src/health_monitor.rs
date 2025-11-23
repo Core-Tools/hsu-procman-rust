@@ -268,11 +268,11 @@ impl HealthMonitor {
         // Check if process exists using platform-specific method
         #[cfg(unix)]
         {
-            use nix::sys::signal::{kill, Signal};
+            use nix::sys::signal::kill;
             use nix::unistd::Pid;
             
             // Send signal 0 (no-op) to check if process exists
-            match kill(Pid::from_raw(pid as i32), Signal::from_c_int(0).ok()) {
+            match kill(Pid::from_raw(pid as i32), None) {
                 Ok(()) => {
                     debug!("Process {} exists (Unix signal check)", pid);
                     HealthCheckData {

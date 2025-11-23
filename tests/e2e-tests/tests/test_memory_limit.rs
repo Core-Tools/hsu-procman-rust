@@ -96,8 +96,14 @@ fn test_memory_limit_violation() {
             println!("⚠ No memory violation detection found\n");
         }
         
-        // Step 5: Check for restart request queued
-        println!("Step 5: Checking for restart request queued...");
+        // Step 5: Wait for heartbeat to process the violation
+        println!("Step 5: Waiting for heartbeat to process violation...");
+        thread::sleep(Duration::from_secs(3));  // Wait for heartbeat cycle (2s interval)
+        
+        procman.collect_logs_now();
+        let logs = procman.get_logs();
+        
+        // Check for restart request queued
         let has_restart_queued = logs.iter().any(|l| 
             l.contains("Resource violation restart request queued") ||
             l.contains("📬") && l.contains("restart")
@@ -106,12 +112,12 @@ fn test_memory_limit_violation() {
         if has_restart_queued {
             println!("✓ Restart request queued\n");
         } else {
-            println!("⚠ No restart request found in logs\n");
+            println!("⚠ No restart request found in logs (yet)\n");
         }
         
-        // Step 6: Wait for heartbeat to process restart
-        println!("Step 6: Waiting for automatic restart...");
-        thread::sleep(Duration::from_secs(5));  // Wait for restart to complete
+        // Step 6: Wait for automatic restart to complete
+        println!("Step 6: Waiting for automatic restart to complete...");
+        thread::sleep(Duration::from_secs(3));  // Wait for restart to complete
         
         procman.collect_logs_now();
         let logs = procman.get_logs();

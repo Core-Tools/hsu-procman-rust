@@ -7,13 +7,13 @@ publish = false
 [dependencies]
 wait-timeout = "0.2"
 
+# For Unix signal handling in process management
+[target.'cfg(unix)'.dependencies]
+nix = { version = "0.27", features = ["signal", "process"] }
+
 [dev-dependencies]
 # Test framework
 tokio = { version = "1.40", features = ["full"] }
-
-# For Unix signal handling in tests
-[target.'cfg(unix)'.dev-dependencies]
-nix = { version = "0.27", features = ["signal", "process"] }
 
 [[test]]
 name = "e2e_tests"

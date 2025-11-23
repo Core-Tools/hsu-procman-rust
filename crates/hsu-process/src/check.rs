@@ -46,7 +46,7 @@ pub fn process_exists(pid: u32) -> ProcessResult<bool> {
 
 #[cfg(unix)]
 fn process_exists_unix(pid: u32) -> ProcessResult<bool> {
-    use nix::sys::signal::{kill, Signal};
+    use nix::sys::signal::kill;
     use nix::unistd::Pid;
     
     let nix_pid = Pid::from_raw(pid as i32);

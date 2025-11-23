@@ -72,12 +72,14 @@ impl TestExecutor {
 
 impl Drop for TestExecutor {
     fn drop(&mut self) {
-        // Auto-cleanup in tests (but keep for debugging if test panics)
-        if !std::thread::panicking() {
-            self.cleanup();
-        } else {
-            println!("Test panicked, keeping test directory for debugging: {}", self.test_dir.display());
-        }
+        // Keep test artifacts for debugging - don't auto-cleanup
+        // Test directories now include timestamps, so they won't accumulate excessively
+        println!("Test artifacts preserved at: {}", self.test_dir.display());
+        
+        // If you want to enable cleanup, uncomment the following:
+        // if !std::thread::panicking() {
+        //     self.cleanup();
+        // }
     }
 }
 

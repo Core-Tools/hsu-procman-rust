@@ -64,21 +64,26 @@ pub fn get_testexe_path() -> PathBuf {
     path
 }
 
-/// Create a temporary test directory
+/// Create a temporary test directory with timestamp for uniqueness
 pub fn create_test_dir(test_name: &str) -> PathBuf {
-    // Use target/tmp instead of system temp to avoid path issues
-    let workspace_root = env::current_exe()
+    // Get the target directory (exe is at target/debug/deps/test_exe)
+    let target_dir = env::current_exe()
         .expect("Failed to get current exe path")
-        .parent().expect("Failed to get parent")
-        .parent().expect("Failed to get parent")
-        .parent().expect("Failed to get workspace root")
+        .parent().expect("Failed to get parent (deps)")
+        .parent().expect("Failed to get parent (debug)")
         .to_path_buf();
     
-    let temp_dir = workspace_root.join("target").join("tmp").join(format!("e2e-test-{}", test_name));
+    // Add timestamp for unique test runs
+    let timestamp = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .expect("Time went backwards")
+        .as_secs();
     
-    if temp_dir.exists() {
-        std::fs::remove_dir_all(&temp_dir).ok();
-    }
+    let temp_dir = target_dir
+        .join("tmp")
+        .join(format!("e2e-test-{}", test_name))
+        .join(format!("run-{}", timestamp));
+    
     std::fs::create_dir_all(&temp_dir).expect("Failed to create test directory");
     temp_dir
 }

@@ -126,7 +126,6 @@ impl ProcessManagerWrapper {
             #[cfg(unix)]
             {
                 // On Unix, send SIGTERM
-                use std::os::unix::process::CommandExt;
                 nix::sys::signal::kill(
                     nix::unistd::Pid::from_raw(child.id() as i32),
                     nix::sys::signal::Signal::SIGTERM

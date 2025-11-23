@@ -1,0 +1,931 @@
+
+running 3 tests
+test log_parser::tests::test_count_occurrences ... ok
+test log_parser::tests::test_log_parser_contains ... ok
+test log_parser::tests::test_log_parser_sequence ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+
+running 8 tests
+test test_forced_stop::test_forced_stop ... 
+========================================
+TEST: Forced Stop
+========================================
+
+=== Test Executor Setup ===
+Test: forced-stop
+Test dir: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-forced-stop\run-1763912171
+PROCMAN: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\hsu-process-manager.exe
+TESTEXE: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\testexe.exe
+===========================
+
+Created test config at: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-forced-stop\run-1763912171\config.yaml
+Starting PROCMAN: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\hsu-process-manager.exe
+Config: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-forced-stop\run-1763912171\config.yaml
+Working dir: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-forced-stop\run-1763912171
+PROCMAN started with PID: Some(20516)
+[PROCMAN] [2m2025-11-23T15:36:11.280479Z[0m [32m INFO[0m ThreadId(01) Starting HSU Process Manager (Rust implementation)
+[PROCMAN] [2m2025-11-23T15:36:11.280923Z[0m [32m INFO[0m ThreadId(01) Config file: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-forced-stop\run-1763912171\config.yaml
+[PROCMAN] [2m2025-11-23T15:36:11.283320Z[0m [32m INFO[0m ThreadId(01) Loaded configuration for 1 processes
+[PROCMAN] [2m2025-11-23T15:36:11.283378Z[0m [32m INFO[0m ThreadId(01) Creating process manager with 1 processes
+[PROCMAN] [2m2025-11-23T15:36:11.670352Z[0m [32m INFO[0m ThreadId(01) Initialized process: testexe
+[PROCMAN] [2m2025-11-23T15:36:11.670444Z[0m [32m INFO[0m ThreadId(01) Scanning for existing processes to reattach
+[PROCMAN] [2m2025-11-23T15:36:11.676205Z[0m [32m INFO[0m ThreadId(01) Process testexe (PID: 30824) no longer exists, cleaning up
+[PROCMAN] [2m2025-11-23T15:36:11.677608Z[0m [32m INFO[0m ThreadId(01) Reattachment scan complete: 0 reattached, 1 cleaned up
+[PROCMAN] [2m2025-11-23T15:36:11.677675Z[0m [32m INFO[0m ThreadId(01) Starting process manager
+[PROCMAN] [2m2025-11-23T15:36:11.677709Z[0m [32m INFO[0m ThreadId(01) Starting process: testexe
+[PROCMAN] [2m2025-11-23T15:36:11.677766Z[0m [32m INFO[0m ThreadId(01) Starting process control: testexe
+[PROCMAN] [2m2025-11-23T15:36:11.677800Z[0m [32m INFO[0m ThreadId(01) Spawning process: testexe
+[PROCMAN] [2m2025-11-23T15:36:11.691509Z[0m [32m INFO[0m ThreadId(01) Process spawned successfully: testexe (PID: 13876)
+[PROCMAN] [2m2025-11-23T15:36:11.691812Z[0m [32m INFO[0m ThreadId(01) Starting health monitor for testexe (type: process)
+[PROCMAN] [2m2025-11-23T15:36:11.691901Z[0m [32m INFO[0m ThreadId(01) Health monitor started for testexe
+[PROCMAN] [2m2025-11-23T15:36:11.691897Z[0m [32m INFO[0m ThreadId(09) Exit monitor started for process testexe (PID: 13876)
+[PROCMAN] [2m2025-11-23T15:36:11.691928Z[0m [32m INFO[0m ThreadId(01) Health check task spawned for testexe
+[PROCMAN] [2m2025-11-23T15:36:11.691972Z[0m [32m INFO[0m ThreadId(01) Spawning resource monitor task for testexe (PID: 13876)
+[PROCMAN] [2m2025-11-23T15:36:11.691992Z[0m [32m INFO[0m ThreadId(01) Spawning violation handler task for testexe
+[PROCMAN] [2m2025-11-23T15:36:11.691978Z[0m [32m INFO[0m ThreadId(08) Health check loop started for testexe (PID: 13876, interval: 1s, failure_threshold: 3)
+[PROCMAN] [2m2025-11-23T15:36:11.692021Z[0m [32m INFO[0m ThreadId(01) Restart handler monitoring task spawned for testexe
+[PROCMAN] [2m2025-11-23T15:36:11.692045Z[0m [32m INFO[0m ThreadId(01) Process control started successfully: testexe
+[PROCMAN] [2m2025-11-23T15:36:11.692780Z[0m [32m INFO[0m ThreadId(01) Process started successfully: testexe
+[PROCMAN] [2m2025-11-23T15:36:11.692822Z[0m [32m INFO[0m ThreadId(01) Process manager started successfully
+[PROCMAN] [2m2025-11-23T15:36:11.692856Z[0m [32m INFO[0m ThreadId(01) Heartbeat task spawned for automatic restart processing
+[PROCMAN] [2m2025-11-23T15:36:11.692880Z[0m [32m INFO[0m ThreadId(01) Process manager started successfully
+[PROCMAN] [2m2025-11-23T15:36:11.705963Z[0m [33m WARN[0m ThreadId(09) Process testexe (PID: 13876) exited with non-zero status: Some(2)
+[PROCMAN] [2m2025-11-23T15:36:11.706008Z[0m [32m INFO[0m ThreadId(09) Exit monitor completed for process testexe (PID: 13876)
+[PROCMAN] [2m2025-11-23T15:36:11.706478Z[0m [32m INFO[0m ThreadId(04) 🔍 Running health check for testexe (PID: 13876)
+[PROCMAN] [2m2025-11-23T15:36:11.706514Z[0m [32m INFO[0m ThreadId(02) ⏰ Heartbeat: Checking for pending restarts for testexe
+[PROCMAN] [2m2025-11-23T15:36:11.706581Z[0m [32m INFO[0m ThreadId(04) Process 13876 has exited (Windows: exit_code=2, result=1)
+[PROCMAN] [2m2025-11-23T15:36:11.706625Z[0m [32m INFO[0m ThreadId(04) 💓 Process health check result for testexe: healthy=false, error=Some("Process 13876 has exited (exit code: 2)")
+[PROCMAN] [2m2025-11-23T15:36:11.706657Z[0m [33m WARN[0m ThreadId(04) ❌ Health check failed for testexe: consecutive failures = 1/3, reason: Process 13876 has exited (exit code: 2)
+PROCMAN is ready
+Step 1: Waiting for TESTEXE to be running...
+Process 'testexe' is running
+✓ TESTEXE is running
+
+Step 2: Letting TESTEXE run for 1 second...
+✓ TESTEXE has been running
+
+Step 3: PROCMAN will force-kill with short timeout...
+Sending termination signal to PROCMAN...
+[PROCMAN] [2m2025-11-23T15:36:12.704226Z[0m [32m INFO[0m ThreadId(07) 🔍 Running health check for testexe (PID: 13876)
+[PROCMAN] [2m2025-11-23T15:36:12.704387Z[0m [32m INFO[0m ThreadId(07) Process 13876 has exited (Windows: exit_code=2, result=1)
+[PROCMAN] [2m2025-11-23T15:36:12.704530Z[0m [32m INFO[0m ThreadId(07) 💓 Process health check result for testexe: healthy=false, error=Some("Process 13876 has exited (exit code: 2)")
+[PROCMAN] [2m2025-11-23T15:36:12.704585Z[0m [33m WARN[0m ThreadId(07) ❌ Health check failed for testexe: consecutive failures = 2/3, reason: Process 13876 has exited (exit code: 2)
+PROCMAN exited with status: exit code: 1
+
+========================================
+✓ TEST PASSED: Forced Stop
+========================================
+
+Test artifacts preserved at: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-forced-stop\run-1763912171
+ok
+test test_graceful_stop::test_graceful_stop ... 
+========================================
+TEST: Graceful Stop
+========================================
+
+=== Test Executor Setup ===
+Test: graceful-stop
+Test dir: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-graceful-stop\run-1763912173
+PROCMAN: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\hsu-process-manager.exe
+TESTEXE: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\testexe.exe
+===========================
+
+Created test config at: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-graceful-stop\run-1763912173\config.yaml
+Starting PROCMAN: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\hsu-process-manager.exe
+Config: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-graceful-stop\run-1763912173\config.yaml
+Working dir: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-graceful-stop\run-1763912173
+PROCMAN started with PID: Some(30068)
+[PROCMAN] [2m2025-11-23T15:36:13.303908Z[0m [32m INFO[0m ThreadId(01) Starting HSU Process Manager (Rust implementation)
+[PROCMAN] [2m2025-11-23T15:36:13.304232Z[0m [32m INFO[0m ThreadId(01) Config file: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-graceful-stop\run-1763912173\config.yaml
+[PROCMAN] [2m2025-11-23T15:36:13.306669Z[0m [32m INFO[0m ThreadId(01) Loaded configuration for 1 processes
+[PROCMAN] [2m2025-11-23T15:36:13.306744Z[0m [32m INFO[0m ThreadId(01) Creating process manager with 1 processes
+[PROCMAN] [2m2025-11-23T15:36:13.590131Z[0m [32m INFO[0m ThreadId(01) Initialized process: testexe
+[PROCMAN] [2m2025-11-23T15:36:13.590230Z[0m [32m INFO[0m ThreadId(01) Scanning for existing processes to reattach
+[PROCMAN] [2m2025-11-23T15:36:13.594101Z[0m [32m INFO[0m ThreadId(01) Found existing process: testexe (PID: 13876)
+[PROCMAN] [2m2025-11-23T15:36:13.596426Z[0m [32m INFO[0m ThreadId(01) Reattachment scan complete: 1 reattached, 0 cleaned up
+[PROCMAN] [2m2025-11-23T15:36:13.596465Z[0m [32m INFO[0m ThreadId(01) Starting process manager
+[PROCMAN] [2m2025-11-23T15:36:13.596490Z[0m [32m INFO[0m ThreadId(01) Starting process: testexe
+[PROCMAN] [2m2025-11-23T15:36:13.596512Z[0m [32m INFO[0m ThreadId(01) Starting process control: testexe
+[PROCMAN] [2m2025-11-23T15:36:13.596532Z[0m [32m INFO[0m ThreadId(01) Spawning process: testexe
+[PROCMAN] [2m2025-11-23T15:36:13.603013Z[0m [32m INFO[0m ThreadId(01) Process spawned successfully: testexe (PID: 19968)
+[PROCMAN] [2m2025-11-23T15:36:13.603114Z[0m [32m INFO[0m ThreadId(01) Starting health monitor for testexe (type: process)
+[PROCMAN] [2m2025-11-23T15:36:13.603201Z[0m [32m INFO[0m ThreadId(01) Health monitor started for testexe
+[PROCMAN] [2m2025-11-23T15:36:13.603216Z[0m [32m INFO[0m ThreadId(01) Health check task spawned for testexe
+[PROCMAN] [2m2025-11-23T15:36:13.603233Z[0m [32m INFO[0m ThreadId(01) Spawning resource monitor task for testexe (PID: 19968)
+[PROCMAN] [2m2025-11-23T15:36:13.603257Z[0m [32m INFO[0m ThreadId(01) Spawning violation handler task for testexe
+[PROCMAN] [2m2025-11-23T15:36:13.603238Z[0m [32m INFO[0m ThreadId(09) Exit monitor started for process testexe (PID: 19968)
+[PROCMAN] [2m2025-11-23T15:36:13.603301Z[0m [32m INFO[0m ThreadId(01) Restart handler monitoring task spawned for testexe
+[PROCMAN] [2m2025-11-23T15:36:13.603279Z[0m [32m INFO[0m ThreadId(08) Health check loop started for testexe (PID: 19968, interval: 1s, failure_threshold: 3)
+[PROCMAN] [2m2025-11-23T15:36:13.603329Z[0m [32m INFO[0m ThreadId(01) Process control started successfully: testexe
+[PROCMAN] [2m2025-11-23T15:36:13.604105Z[0m [32m INFO[0m ThreadId(01) Process started successfully: testexe
+[PROCMAN] [2m2025-11-23T15:36:13.604138Z[0m [32m INFO[0m ThreadId(01) Process manager started successfully
+[PROCMAN] [2m2025-11-23T15:36:13.604163Z[0m [32m INFO[0m ThreadId(01) Heartbeat task spawned for automatic restart processing
+[PROCMAN] [2m2025-11-23T15:36:13.604175Z[0m [32m INFO[0m ThreadId(01) Process manager started successfully
+[PROCMAN] [2m2025-11-23T15:36:13.607302Z[0m [32m INFO[0m ThreadId(07) 🔍 Running health check for testexe (PID: 19968)
+[PROCMAN] [2m2025-11-23T15:36:13.607302Z[0m [32m INFO[0m ThreadId(02) ⏰ Heartbeat: Checking for pending restarts for testexe
+[PROCMAN] [2m2025-11-23T15:36:13.607420Z[0m [32m INFO[0m ThreadId(07) 💓 Process health check result for testexe: healthy=true, error=None
+[PROCMAN] [2m2025-11-23T15:36:13.612011Z[0m [33m WARN[0m ThreadId(08) Process testexe (PID: 19968) exited with non-zero status: Some(2)
+[PROCMAN] [2m2025-11-23T15:36:13.612051Z[0m [32m INFO[0m ThreadId(08) Exit monitor completed for process testexe (PID: 19968)
+PROCMAN is ready
+Step 1: Waiting for TESTEXE to be running...
+Process 'testexe' is running
+✓ TESTEXE is running
+
+Step 2: Letting TESTEXE run for 2 seconds...
+✓ TESTEXE has been running
+
+Step 3: PROCMAN will send shutdown signal...
+Sending termination signal to PROCMAN...
+[PROCMAN] [2m2025-11-23T15:36:14.619338Z[0m [32m INFO[0m ThreadId(05) 🔍 Running health check for testexe (PID: 19968)
+[PROCMAN] [2m2025-11-23T15:36:14.619488Z[0m [32m INFO[0m ThreadId(05) Process 19968 has exited (Windows: exit_code=2, result=1)
+[PROCMAN] [2m2025-11-23T15:36:14.619517Z[0m [32m INFO[0m ThreadId(05) 💓 Process health check result for testexe: healthy=false, error=Some("Process 19968 has exited (exit code: 2)")
+[PROCMAN] [2m2025-11-23T15:36:14.619544Z[0m [33m WARN[0m ThreadId(05) ❌ Health check failed for testexe: consecutive failures = 1/3, reason: Process 19968 has exited (exit code: 2)
+[PROCMAN] [2m2025-11-23T15:36:15.615698Z[0m [32m INFO[0m ThreadId(05) ⏰ Heartbeat: Checking for pending restarts for testexe
+[PROCMAN] [2m2025-11-23T15:36:15.615705Z[0m [32m INFO[0m ThreadId(02) 🔍 Running health check for testexe (PID: 19968)
+[PROCMAN] [2m2025-11-23T15:36:15.615834Z[0m [32m INFO[0m ThreadId(02) Process 19968 has exited (Windows: exit_code=2, result=1)
+[PROCMAN] [2m2025-11-23T15:36:15.615858Z[0m [32m INFO[0m ThreadId(02) 💓 Process health check result for testexe: healthy=false, error=Some("Process 19968 has exited (exit code: 2)")
+[PROCMAN] [2m2025-11-23T15:36:15.615879Z[0m [33m WARN[0m ThreadId(02) ❌ Health check failed for testexe: consecutive failures = 2/3, reason: Process 19968 has exited (exit code: 2)
+PROCMAN exited with status: exit code: 1
+
+========================================
+✓ TEST PASSED: Graceful Stop
+========================================
+
+Test artifacts preserved at: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-graceful-stop\run-1763912173
+ok
+test test_graceful_stop::test_graceful_stop_detailed ... ignored
+test test_health_restart::test_health_restart ... 
+========================================
+TEST: Health Check Restart
+========================================
+
+=== Test Executor Setup ===
+Test: health-restart
+Test dir: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-health-restart\run-1763912176
+PROCMAN: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\hsu-process-manager.exe
+TESTEXE: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\testexe.exe
+===========================
+
+Created test config at: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-health-restart\run-1763912176\config.yaml
+Starting PROCMAN: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\hsu-process-manager.exe
+Config: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-health-restart\run-1763912176\config.yaml
+Working dir: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-health-restart\run-1763912176
+PROCMAN started with PID: Some(31820)
+[PROCMAN] [2m2025-11-23T15:36:16.229303Z[0m [32m INFO[0m ThreadId(01) Starting HSU Process Manager (Rust implementation)
+[PROCMAN] [2m2025-11-23T15:36:16.229782Z[0m [32m INFO[0m ThreadId(01) Config file: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-health-restart\run-1763912176\config.yaml
+[PROCMAN] [2m2025-11-23T15:36:16.232130Z[0m [32m INFO[0m ThreadId(01) Loaded configuration for 1 processes
+[PROCMAN] [2m2025-11-23T15:36:16.232172Z[0m [32m INFO[0m ThreadId(01) Creating process manager with 1 processes
+[PROCMAN] [2m2025-11-23T15:36:16.567848Z[0m [32m INFO[0m ThreadId(01) Initialized process: testexe
+[PROCMAN] [2m2025-11-23T15:36:16.567937Z[0m [32m INFO[0m ThreadId(01) Scanning for existing processes to reattach
+[PROCMAN] [2m2025-11-23T15:36:16.569599Z[0m [32m INFO[0m ThreadId(01) Found existing process: testexe (PID: 19968)
+[PROCMAN] [2m2025-11-23T15:36:16.571617Z[0m [32m INFO[0m ThreadId(01) Reattachment scan complete: 1 reattached, 0 cleaned up
+[PROCMAN] [2m2025-11-23T15:36:16.571848Z[0m [32m INFO[0m ThreadId(01) Starting process manager
+[PROCMAN] [2m2025-11-23T15:36:16.571997Z[0m [32m INFO[0m ThreadId(01) Starting process: testexe
+[PROCMAN] [2m2025-11-23T15:36:16.572039Z[0m [32m INFO[0m ThreadId(01) Starting process control: testexe
+[PROCMAN] [2m2025-11-23T15:36:16.572086Z[0m [32m INFO[0m ThreadId(01) Spawning process: testexe
+[PROCMAN] [2m2025-11-23T15:36:16.580329Z[0m [32m INFO[0m ThreadId(01) Process spawned successfully: testexe (PID: 23020)
+[PROCMAN] [2m2025-11-23T15:36:16.580485Z[0m [32m INFO[0m ThreadId(01) Starting health monitor for testexe (type: process)
+[PROCMAN] [2m2025-11-23T15:36:16.580556Z[0m [32m INFO[0m ThreadId(01) Health monitor started for testexe
+[PROCMAN] [2m2025-11-23T15:36:16.580552Z[0m [32m INFO[0m ThreadId(09) Exit monitor started for process testexe (PID: 23020)
+[PROCMAN] [2m2025-11-23T15:36:16.580579Z[0m [32m INFO[0m ThreadId(01) Health check task spawned for testexe
+[PROCMAN] [2m2025-11-23T15:36:16.580621Z[0m [32m INFO[0m ThreadId(01) Spawning resource monitor task for testexe (PID: 23020)
+[PROCMAN] [2m2025-11-23T15:36:16.580612Z[0m [32m INFO[0m ThreadId(08) Health check loop started for testexe (PID: 23020, interval: 1s, failure_threshold: 3)
+[PROCMAN] [2m2025-11-23T15:36:16.580658Z[0m [32m INFO[0m ThreadId(01) Spawning violation handler task for testexe
+[PROCMAN] [2m2025-11-23T15:36:16.580698Z[0m [32m INFO[0m ThreadId(01) Restart handler monitoring task spawned for testexe
+[PROCMAN] [2m2025-11-23T15:36:16.580736Z[0m [32m INFO[0m ThreadId(01) Process control started successfully: testexe
+[PROCMAN] [2m2025-11-23T15:36:16.581226Z[0m [32m INFO[0m ThreadId(01) Process started successfully: testexe
+[PROCMAN] [2m2025-11-23T15:36:16.581260Z[0m [32m INFO[0m ThreadId(01) Process manager started successfully
+[PROCMAN] [2m2025-11-23T15:36:16.581285Z[0m [32m INFO[0m ThreadId(01) Heartbeat task spawned for automatic restart processing
+[PROCMAN] [2m2025-11-23T15:36:16.581312Z[0m [32m INFO[0m ThreadId(01) Process manager started successfully
+[PROCMAN] [2m2025-11-23T15:36:16.593676Z[0m [32m INFO[0m ThreadId(02) ⏰ Heartbeat: Checking for pending restarts for testexe
+[PROCMAN] [2m2025-11-23T15:36:16.593690Z[0m [32m INFO[0m ThreadId(05) 🔍 Running health check for testexe (PID: 23020)
+[PROCMAN] [2m2025-11-23T15:36:16.593784Z[0m [32m INFO[0m ThreadId(05) 💓 Process health check result for testexe: healthy=true, error=None
+PROCMAN is ready
+Step 1: Waiting for TESTEXE first run...
+Process 'testexe' is running
+✓ TESTEXE first run started
+
+Step 2: Waiting for TESTEXE to exit after 3 seconds...
+[PROCMAN] [2m2025-11-23T15:36:17.593156Z[0m [32m INFO[0m ThreadId(06) 🔍 Running health check for testexe (PID: 23020)
+[PROCMAN] [2m2025-11-23T15:36:17.593272Z[0m [32m INFO[0m ThreadId(06) 💓 Process health check result for testexe: healthy=true, error=None
+[PROCMAN] [2m2025-11-23T15:36:18.587825Z[0m [32m INFO[0m ThreadId(06) 🔍 Running health check for testexe (PID: 23020)
+[PROCMAN] [2m2025-11-23T15:36:18.587869Z[0m [32m INFO[0m ThreadId(08) ⏰ Heartbeat: Checking for pending restarts for testexe
+[PROCMAN] [2m2025-11-23T15:36:18.587923Z[0m [32m INFO[0m ThreadId(06) 💓 Process health check result for testexe: healthy=true, error=None
+[PROCMAN] [2m2025-11-23T15:36:19.583699Z[0m [32m INFO[0m ThreadId(02) 🔍 Running health check for testexe (PID: 23020)
+[PROCMAN] [2m2025-11-23T15:36:19.583776Z[0m [32m INFO[0m ThreadId(02) 💓 Process health check result for testexe: healthy=true, error=None
+[PROCMAN] [2m2025-11-23T15:36:20.596253Z[0m [32m INFO[0m ThreadId(02) 🔍 Running health check for testexe (PID: 23020)
+[PROCMAN] [2m2025-11-23T15:36:20.596401Z[0m [32m INFO[0m ThreadId(02) 💓 Process health check result for testexe: healthy=true, error=None
+[PROCMAN] [2m2025-11-23T15:36:20.596440Z[0m [32m INFO[0m ThreadId(07) ⏰ Heartbeat: Checking for pending restarts for testexe
+⚠ No exit message found in logs
+Step 3: Waiting for PROCMAN to restart TESTEXE...
+[PROCMAN] [2m2025-11-23T15:36:20.708742Z[0m [32m INFO[0m ThreadId(07) Process testexe (PID: 23020) exited successfully with code: Some(0)
+[PROCMAN] [2m2025-11-23T15:36:20.708844Z[0m [32m INFO[0m ThreadId(07) Exit monitor completed for process testexe (PID: 23020)
+[PROCMAN] [2m2025-11-23T15:36:21.594757Z[0m [32m INFO[0m ThreadId(08) 🔍 Running health check for testexe (PID: 23020)
+[PROCMAN] [2m2025-11-23T15:36:21.594887Z[0m [32m INFO[0m ThreadId(08) Process 23020 has exited (Windows: exit_code=0, result=1)
+[PROCMAN] [2m2025-11-23T15:36:21.594922Z[0m [32m INFO[0m ThreadId(08) 💓 Process health check result for testexe: healthy=false, error=Some("Process 23020 has exited (exit code: 0)")
+[PROCMAN] [2m2025-11-23T15:36:21.594956Z[0m [33m WARN[0m ThreadId(08) ❌ Health check failed for testexe: consecutive failures = 1/3, reason: Process 23020 has exited (exit code: 0)
+[PROCMAN] [2m2025-11-23T15:36:22.589943Z[0m [32m INFO[0m ThreadId(08) 🔍 Running health check for testexe (PID: 23020)
+[PROCMAN] [2m2025-11-23T15:36:22.590057Z[0m [32m INFO[0m ThreadId(08) Process 23020 has exited (Windows: exit_code=0, result=1)
+[PROCMAN] [2m2025-11-23T15:36:22.590056Z[0m [32m INFO[0m ThreadId(06) ⏰ Heartbeat: Checking for pending restarts for testexe
+[PROCMAN] [2m2025-11-23T15:36:22.590072Z[0m [32m INFO[0m ThreadId(08) 💓 Process health check result for testexe: healthy=false, error=Some("Process 23020 has exited (exit code: 0)")
+[PROCMAN] [2m2025-11-23T15:36:22.590113Z[0m [33m WARN[0m ThreadId(08) ❌ Health check failed for testexe: consecutive failures = 2/3, reason: Process 23020 has exited (exit code: 0)
+[PROCMAN] [2m2025-11-23T15:36:23.586717Z[0m [32m INFO[0m ThreadId(02) 🔍 Running health check for testexe (PID: 23020)
+[PROCMAN] [2m2025-11-23T15:36:23.586894Z[0m [32m INFO[0m ThreadId(02) Process 23020 has exited (Windows: exit_code=0, result=1)
+[PROCMAN] [2m2025-11-23T15:36:23.586968Z[0m [32m INFO[0m ThreadId(02) 💓 Process health check result for testexe: healthy=false, error=Some("Process 23020 has exited (exit code: 0)")
+[PROCMAN] [2m2025-11-23T15:36:23.587036Z[0m [33m WARN[0m ThreadId(02) ❌ Health check failed for testexe: consecutive failures = 3/3, reason: Process 23020 has exited (exit code: 0)
+[PROCMAN] [2m2025-11-23T15:36:23.587143Z[0m [31mERROR[0m ThreadId(02) 🚨 Health check failure threshold reached for testexe (failures: 3)
+[PROCMAN] [2m2025-11-23T15:36:23.587164Z[0m [32m INFO[0m ThreadId(02) 📞 Calling restart callback for testexe
+[PROCMAN] [2m2025-11-23T15:36:23.587208Z[0m [32m INFO[0m ThreadId(02) 🔔 Health restart callback invoked for testexe: Process 23020 has exited (exit code: 0)
+[PROCMAN] [2m2025-11-23T15:36:23.587244Z[0m [32m INFO[0m ThreadId(02) 🔧 Restart policy check for testexe: should_restart=true, circuit_breaker_tripped=false
+[PROCMAN] [2m2025-11-23T15:36:23.587272Z[0m [32m INFO[0m ThreadId(02) ✅ Health restart allowed, queueing restart request for testexe: Process 23020 has exited (exit code: 0)
+[PROCMAN] [2m2025-11-23T15:36:23.587312Z[0m [32m INFO[0m ThreadId(02) 📬 Restart request queued successfully for testexe
+[PROCMAN] [2m2025-11-23T15:36:23.587334Z[0m [32m INFO[0m ThreadId(02) ✅ Restart callback succeeded for testexe
+✓ PROCMAN restarted TESTEXE
+
+Step 4: Verifying second instance is running...
+[PROCMAN] [2m2025-11-23T15:36:24.585199Z[0m [32m INFO[0m ThreadId(02) 🔍 Running health check for testexe (PID: 23020)
+[PROCMAN] [2m2025-11-23T15:36:24.585477Z[0m [32m INFO[0m ThreadId(06) Restart request(s) pending for testexe - will be processed on next heartbeat
+[PROCMAN] [2m2025-11-23T15:36:24.585553Z[0m [32m INFO[0m ThreadId(07) ⏰ Heartbeat: Checking for pending restarts for testexe
+[PROCMAN] [2m2025-11-23T15:36:24.585617Z[0m [32m INFO[0m ThreadId(02) Process 23020 has exited (Windows: exit_code=0, result=1)
+[PROCMAN] [2m2025-11-23T15:36:24.585673Z[0m [32m INFO[0m ThreadId(07) 📦 Found pending restart request for testexe
+[PROCMAN] [2m2025-11-23T15:36:24.585904Z[0m [32m INFO[0m ThreadId(07) 🔄 Processing restart request for testexe: Process 23020 has exited (exit code: 0) (trigger: HealthFailure)
+[PROCMAN] [2m2025-11-23T15:36:24.585703Z[0m [32m INFO[0m ThreadId(02) 💓 Process health check result for testexe: healthy=false, error=Some("Process 23020 has exited (exit code: 0)")
+[PROCMAN] [2m2025-11-23T15:36:24.585995Z[0m [32m INFO[0m ThreadId(07) Restarting process control: testexe (force: false)
+[PROCMAN] [2m2025-11-23T15:36:24.586062Z[0m [33m WARN[0m ThreadId(02) ❌ Health check failed for testexe: consecutive failures = 4/3, reason: Process 23020 has exited (exit code: 0)
+[PROCMAN] [2m2025-11-23T15:36:24.586098Z[0m [32m INFO[0m ThreadId(07) Stopping process control: testexe
+[PROCMAN] [2m2025-11-23T15:36:24.586307Z[0m [32m INFO[0m ThreadId(07) Terminating process: testexe
+[PROCMAN] [2m2025-11-23T15:36:24.586374Z[0m [32m INFO[0m ThreadId(07) Sending termination signal to PID 23020
+[PROCMAN] [2m2025-11-23T15:36:24.746634Z[0m [33m WARN[0m ThreadId(07) taskkill returned non-zero status for PID 23020: �訡��: �� 㤠���� ���� ����� "23020".
+[PROCMAN] 
+[PROCMAN] [2m2025-11-23T15:36:24.746767Z[0m [32m INFO[0m ThreadId(07) Process terminated: testexe
+[PROCMAN] [2m2025-11-23T15:36:24.746826Z[0m [32m INFO[0m ThreadId(07) Process control stopped successfully: testexe
+[PROCMAN] [2m2025-11-23T15:36:26.762260Z[0m [32m INFO[0m ThreadId(08) Starting process control: testexe
+[PROCMAN] [2m2025-11-23T15:36:26.762390Z[0m [32m INFO[0m ThreadId(08) Spawning process: testexe
+[PROCMAN] [2m2025-11-23T15:36:26.777145Z[0m [32m INFO[0m ThreadId(08) Process spawned successfully: testexe (PID: 2024)
+[PROCMAN] [2m2025-11-23T15:36:26.777223Z[0m [32m INFO[0m ThreadId(08) Starting health monitor for testexe (type: process)
+[PROCMAN] [2m2025-11-23T15:36:26.777303Z[0m [32m INFO[0m ThreadId(08) Health monitor started for testexe
+[PROCMAN] [2m2025-11-23T15:36:26.777320Z[0m [32m INFO[0m ThreadId(08) Health check task spawned for testexe
+[PROCMAN] [2m2025-11-23T15:36:26.777335Z[0m [32m INFO[0m ThreadId(08) Spawning resource monitor task for testexe (PID: 2024)
+[PROCMAN] [2m2025-11-23T15:36:26.777354Z[0m [32m INFO[0m ThreadId(08) Spawning violation handler task for testexe
+[PROCMAN] [2m2025-11-23T15:36:26.777376Z[0m [32m INFO[0m ThreadId(08) Restart handler monitoring task spawned for testexe
+[PROCMAN] [2m2025-11-23T15:36:26.777394Z[0m [32m INFO[0m ThreadId(08) Process control started successfully: testexe
+[PROCMAN] [2m2025-11-23T15:36:26.777387Z[0m [32m INFO[0m ThreadId(02) Exit monitor started for process testexe (PID: 2024)
+[PROCMAN] [2m2025-11-23T15:36:26.777421Z[0m [32m INFO[0m ThreadId(08) Circuit breaker reset
+[PROCMAN] [2m2025-11-23T15:36:26.777444Z[0m [32m INFO[0m ThreadId(08) Process control restarted successfully: testexe
+[PROCMAN] [2m2025-11-23T15:36:26.777460Z[0m [32m INFO[0m ThreadId(08) ✅ Automatic restart succeeded for testexe (trigger: HealthFailure)
+[PROCMAN] [2m2025-11-23T15:36:26.777475Z[0m [32m INFO[0m ThreadId(02) Health check loop started for testexe (PID: 2024, interval: 1s, failure_threshold: 3)
+[PROCMAN] [2m2025-11-23T15:36:26.777483Z[0m [32m INFO[0m ThreadId(08) Processed 1 restart request(s) for testexe
+[PROCMAN] [2m2025-11-23T15:36:26.777542Z[0m [32m INFO[0m ThreadId(08) 🔄 Processed 1 automatic restart(s) for testexe
+[PROCMAN] [2m2025-11-23T15:36:26.777643Z[0m [32m INFO[0m ThreadId(08) ⏰ Heartbeat: Checking for pending restarts for testexe
+[PROCMAN] [2m2025-11-23T15:36:26.777724Z[0m [32m INFO[0m ThreadId(07) 🔍 Running health check for testexe (PID: 2024)
+[PROCMAN] [2m2025-11-23T15:36:26.777862Z[0m [32m INFO[0m ThreadId(07) 💓 Process health check result for testexe: healthy=true, error=None
+[PROCMAN] [2m2025-11-23T15:36:27.792146Z[0m [32m INFO[0m ThreadId(08) 🔍 Running health check for testexe (PID: 2024)
+[PROCMAN] [2m2025-11-23T15:36:27.792324Z[0m [32m INFO[0m ThreadId(08) 💓 Process health check result for testexe: healthy=true, error=None
+[PROCMAN] [2m2025-11-23T15:36:28.582942Z[0m [32m INFO[0m ThreadId(08) ⏰ Heartbeat: Checking for pending restarts for testexe
+Process spawn count: 2
+✓ Second instance confirmed (spawn count: 2)
+
+Sending termination signal to PROCMAN...
+PROCMAN exited with status: exit code: 1
+
+========================================
+✓ TEST PASSED: Health Check Restart
+========================================
+
+Test artifacts preserved at: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-health-restart\run-1763912176
+ok
+test test_health_restart::test_max_restart_attempts ... ignored
+test test_memory_limit::test_cpu_limit_warning ... ignored
+test test_memory_limit::test_memory_growth_violation ... ignored
+test test_memory_limit::test_memory_limit_violation ... 
+========================================
+TEST: Memory Limit Violation
+========================================
+
+=== Test Executor Setup ===
+Test: memory-limit
+Test dir: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-memory-limit\run-1763912189
+PROCMAN: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\hsu-process-manager.exe
+TESTEXE: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\testexe.exe
+===========================
+
+Created test config at: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-memory-limit\run-1763912189\config.yaml
+Starting PROCMAN: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\hsu-process-manager.exe
+Config: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-memory-limit\run-1763912189\config.yaml
+Working dir: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-memory-limit\run-1763912189
+PROCMAN started with PID: Some(24212)
+[PROCMAN] [2m2025-11-23T15:36:29.147079Z[0m [32m INFO[0m ThreadId(01) Starting HSU Process Manager (Rust implementation)
+[PROCMAN] [2m2025-11-23T15:36:29.147404Z[0m [32m INFO[0m ThreadId(01) Config file: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-memory-limit\run-1763912189\config.yaml
+[PROCMAN] [2m2025-11-23T15:36:29.149734Z[0m [32m INFO[0m ThreadId(01) Loaded configuration for 1 processes
+[PROCMAN] [2m2025-11-23T15:36:29.149780Z[0m [32m INFO[0m ThreadId(01) Creating process manager with 1 processes
+[PROCMAN] [2m2025-11-23T15:36:29.430819Z[0m [32m INFO[0m ThreadId(01) Initialized process: testexe
+[PROCMAN] [2m2025-11-23T15:36:29.430905Z[0m [32m INFO[0m ThreadId(01) Scanning for existing processes to reattach
+[PROCMAN] [2m2025-11-23T15:36:29.433023Z[0m [32m INFO[0m ThreadId(01) Found existing process: testexe (PID: 23020)
+[PROCMAN] [2m2025-11-23T15:36:29.433990Z[0m [32m INFO[0m ThreadId(01) Reattachment scan complete: 1 reattached, 0 cleaned up
+[PROCMAN] [2m2025-11-23T15:36:29.434042Z[0m [32m INFO[0m ThreadId(01) Starting process manager
+[PROCMAN] [2m2025-11-23T15:36:29.434077Z[0m [32m INFO[0m ThreadId(01) Starting process: testexe
+[PROCMAN] [2m2025-11-23T15:36:29.434123Z[0m [32m INFO[0m ThreadId(01) Starting process control: testexe
+[PROCMAN] [2m2025-11-23T15:36:29.434170Z[0m [32m INFO[0m ThreadId(01) Spawning process: testexe
+PROCMAN is ready
+Step 1: Waiting for TESTEXE to start...
+[PROCMAN] [2m2025-11-23T15:36:29.441369Z[0m [32m INFO[0m ThreadId(01) Process spawned successfully: testexe (PID: 22944)
+[PROCMAN] [2m2025-11-23T15:36:29.441532Z[0m [32m INFO[0m ThreadId(01) Starting health monitor for testexe (type: process)
+[PROCMAN] [2m2025-11-23T15:36:29.441617Z[0m [32m INFO[0m ThreadId(01) Health monitor started for testexe
+[PROCMAN] [2m2025-11-23T15:36:29.441617Z[0m [32m INFO[0m ThreadId(08) Exit monitor started for process testexe (PID: 22944)
+[PROCMAN] [2m2025-11-23T15:36:29.441642Z[0m [32m INFO[0m ThreadId(01) Health check task spawned for testexe
+[PROCMAN] [2m2025-11-23T15:36:29.441705Z[0m [32m INFO[0m ThreadId(01) Spawning resource monitor task for testexe (PID: 22944)
+[PROCMAN] [2m2025-11-23T15:36:29.441696Z[0m [32m INFO[0m ThreadId(09) Health check loop started for testexe (PID: 22944, interval: 1s, failure_threshold: 3)
+[PROCMAN] [2m2025-11-23T15:36:29.441742Z[0m [32m INFO[0m ThreadId(01) Spawning violation handler task for testexe
+[PROCMAN] [2m2025-11-23T15:36:29.441786Z[0m [32m INFO[0m ThreadId(01) Restart handler monitoring task spawned for testexe
+[PROCMAN] [2m2025-11-23T15:36:29.441808Z[0m [32m INFO[0m ThreadId(01) Process control started successfully: testexe
+[PROCMAN] [2m2025-11-23T15:36:29.442334Z[0m [32m INFO[0m ThreadId(01) Process started successfully: testexe
+[PROCMAN] [2m2025-11-23T15:36:29.442395Z[0m [32m INFO[0m ThreadId(01) Process manager started successfully
+[PROCMAN] [2m2025-11-23T15:36:29.442425Z[0m [32m INFO[0m ThreadId(01) Heartbeat task spawned for automatic restart processing
+[PROCMAN] [2m2025-11-23T15:36:29.442443Z[0m [32m INFO[0m ThreadId(01) Process manager started successfully
+[PROCMAN] [2m2025-11-23T15:36:29.456513Z[0m [32m INFO[0m ThreadId(08) 🔍 Running health check for testexe (PID: 22944)
+[PROCMAN] [2m2025-11-23T15:36:29.456504Z[0m [32m INFO[0m ThreadId(09) ⏰ Heartbeat: Checking for pending restarts for testexe
+[PROCMAN] [2m2025-11-23T15:36:29.456588Z[0m [32m INFO[0m ThreadId(08) 💓 Process health check result for testexe: healthy=true, error=None
+[PROCMAN] [2m2025-11-23T15:36:29.456672Z[0m [32m INFO[0m ThreadId(07) 💾 Memory limit configured for testexe: 100 MB (policy: Restart)
+Process 'testexe' is running
+✓ TESTEXE started
+
+Step 2: Waiting for memory allocation (150MB)...
+[PROCMAN] [2m2025-11-23T15:36:30.451180Z[0m [32m INFO[0m ThreadId(06) 🔍 Running health check for testexe (PID: 22944)
+[PROCMAN] [2m2025-11-23T15:36:30.451428Z[0m [32m INFO[0m ThreadId(06) 💓 Process health check result for testexe: healthy=true, error=None
+[PROCMAN] [2m2025-11-23T15:36:31.449116Z[0m [32m INFO[0m ThreadId(06) 🔍 Running health check for testexe (PID: 22944)
+[PROCMAN] [2m2025-11-23T15:36:31.449177Z[0m [32m INFO[0m ThreadId(09) ⏰ Heartbeat: Checking for pending restarts for testexe
+[PROCMAN] [2m2025-11-23T15:36:31.449206Z[0m [32m INFO[0m ThreadId(06) 💓 Process health check result for testexe: healthy=true, error=None
+[PROCMAN] [2m2025-11-23T15:36:32.448888Z[0m [32m INFO[0m ThreadId(07) 🔍 Running health check for testexe (PID: 22944)
+[PROCMAN] [2m2025-11-23T15:36:32.449179Z[0m [32m INFO[0m ThreadId(07) 💓 Process health check result for testexe: healthy=true, error=None
+✓ Memory allocation logged
+
+Step 3: Checking for resource monitoring...
+[PROCMAN] [2m2025-11-23T15:36:33.445789Z[0m [32m INFO[0m ThreadId(07) 🔍 Running health check for testexe (PID: 22944)
+[PROCMAN] [2m2025-11-23T15:36:33.445908Z[0m [32m INFO[0m ThreadId(08) ⏰ Heartbeat: Checking for pending restarts for testexe
+[PROCMAN] [2m2025-11-23T15:36:33.445938Z[0m [32m INFO[0m ThreadId(07) 💓 Process health check result for testexe: healthy=true, error=None
+[PROCMAN] [2m2025-11-23T15:36:34.445340Z[0m [32m INFO[0m ThreadId(09) 🔍 Running health check for testexe (PID: 22944)
+[PROCMAN] [2m2025-11-23T15:36:34.445430Z[0m [32m INFO[0m ThreadId(09) 💓 Process health check result for testexe: healthy=true, error=None
+[PROCMAN] [2m2025-11-23T15:36:35.456075Z[0m [32m INFO[0m ThreadId(09) 🔍 Running health check for testexe (PID: 22944)
+[PROCMAN] [2m2025-11-23T15:36:35.456138Z[0m [32m INFO[0m ThreadId(06) ⏰ Heartbeat: Checking for pending restarts for testexe
+[PROCMAN] [2m2025-11-23T15:36:35.456149Z[0m [32m INFO[0m ThreadId(09) 💓 Process health check result for testexe: healthy=true, error=None
+✓ Resource monitoring is active
+
+Step 4: Checking for memory violation detection...
+[PROCMAN] [2m2025-11-23T15:36:36.452781Z[0m [32m INFO[0m ThreadId(08) 🔍 Running health check for testexe (PID: 22944)
+[PROCMAN] [2m2025-11-23T15:36:36.452986Z[0m [32m INFO[0m ThreadId(08) 💓 Process health check result for testexe: healthy=true, error=None
+[PROCMAN] [2m2025-11-23T15:36:37.448121Z[0m [32m INFO[0m ThreadId(08) 🔍 Running health check for testexe (PID: 22944)
+[PROCMAN] [2m2025-11-23T15:36:37.448178Z[0m [32m INFO[0m ThreadId(07) ⏰ Heartbeat: Checking for pending restarts for testexe
+[PROCMAN] [2m2025-11-23T15:36:37.448232Z[0m [32m INFO[0m ThreadId(08) 💓 Process health check result for testexe: healthy=true, error=None
+[PROCMAN] [2m2025-11-23T15:36:38.458027Z[0m [32m INFO[0m ThreadId(06) 🔍 Running health check for testexe (PID: 22944)
+[PROCMAN] [2m2025-11-23T15:36:38.458155Z[0m [32m INFO[0m ThreadId(06) 💓 Process health check result for testexe: healthy=true, error=None
+✓ Memory violation detected in logs
+
+Step 5: Waiting for heartbeat to process violation...
+[PROCMAN] [2m2025-11-23T15:36:39.447506Z[0m [32m INFO[0m ThreadId(06) 🔍 Running health check for testexe (PID: 22944)
+[PROCMAN] [2m2025-11-23T15:36:39.447557Z[0m [32m INFO[0m ThreadId(09) ⏰ Heartbeat: Checking for pending restarts for testexe
+[PROCMAN] [2m2025-11-23T15:36:39.447655Z[0m [32m INFO[0m ThreadId(06) 💓 Process health check result for testexe: healthy=true, error=None
+[PROCMAN] [2m2025-11-23T15:36:39.447715Z[0m [32m INFO[0m ThreadId(08) 💾 Memory limit configured for testexe: 100 MB (policy: Restart)
+[PROCMAN] [2m2025-11-23T15:36:39.447768Z[0m [33m WARN[0m ThreadId(08) ⚠️  Detected 1 resource violation(s) for testexe
+[PROCMAN] [2m2025-11-23T15:36:39.447784Z[0m [32m INFO[0m ThreadId(08) 📤 Sending violation to handler: Memory → policy=Restart
+[PROCMAN] [2m2025-11-23T15:36:39.447825Z[0m [33m WARN[0m ThreadId(08) 🚨 Resource violation detected for process testexe: Memory usage 156 MB exceeds limit 100 MB (policy: Restart)
+[PROCMAN] [2m2025-11-23T15:36:39.447847Z[0m [31mERROR[0m ThreadId(08) 🔄 RESTART: Resource limit exceeded, triggering automatic restart (policy: restart): Memory usage 156 MB exceeds limit 100 MB
+[PROCMAN] [2m2025-11-23T15:36:39.447867Z[0m [32m INFO[0m ThreadId(08) 🔧 Resource violation restart policy check for testexe: should_restart=true, circuit_breaker_tripped=false
+[PROCMAN] [2m2025-11-23T15:36:39.447889Z[0m [32m INFO[0m ThreadId(08) ✅ Resource violation restart allowed, queueing restart request for testexe
+[PROCMAN] [2m2025-11-23T15:36:39.447909Z[0m [32m INFO[0m ThreadId(08) 📬 Resource violation restart request queued for testexe
+[PROCMAN] [2m2025-11-23T15:36:40.443896Z[0m [32m INFO[0m ThreadId(07) 🔍 Running health check for testexe (PID: 22944)
+[PROCMAN] [2m2025-11-23T15:36:40.444082Z[0m [32m INFO[0m ThreadId(07) 💓 Process health check result for testexe: healthy=true, error=None
+[PROCMAN] [2m2025-11-23T15:36:41.444303Z[0m [32m INFO[0m ThreadId(07) 🔍 Running health check for testexe (PID: 22944)
+[PROCMAN] [2m2025-11-23T15:36:41.444348Z[0m [32m INFO[0m ThreadId(06) Restart request(s) pending for testexe - will be processed on next heartbeat
+[PROCMAN] [2m2025-11-23T15:36:41.444505Z[0m [32m INFO[0m ThreadId(07) 💓 Process health check result for testexe: healthy=true, error=None
+[PROCMAN] [2m2025-11-23T15:36:41.444512Z[0m [32m INFO[0m ThreadId(09) ⏰ Heartbeat: Checking for pending restarts for testexe
+[PROCMAN] [2m2025-11-23T15:36:41.444812Z[0m [32m INFO[0m ThreadId(09) 📦 Found pending restart request for testexe
+[PROCMAN] [2m2025-11-23T15:36:41.444862Z[0m [32m INFO[0m ThreadId(09) 🔄 Processing restart request for testexe: Resource violation: Memory usage 156 MB exceeds limit 100 MB (trigger: ResourceViolation)
+[PROCMAN] [2m2025-11-23T15:36:41.444924Z[0m [32m INFO[0m ThreadId(09) Restarting process control: testexe (force: false)
+[PROCMAN] [2m2025-11-23T15:36:41.444963Z[0m [32m INFO[0m ThreadId(09) Stopping process control: testexe
+[PROCMAN] [2m2025-11-23T15:36:41.445098Z[0m [32m INFO[0m ThreadId(09) Terminating process: testexe
+[PROCMAN] [2m2025-11-23T15:36:41.445149Z[0m [32m INFO[0m ThreadId(09) Sending termination signal to PID 22944
+[PROCMAN] [2m2025-11-23T15:36:41.540966Z[0m [33m WARN[0m ThreadId(09) taskkill returned non-zero status for PID 22944: �訡��: �� 㤠���� �������� ����� � �����䨪��஬ 22944.
+[PROCMAN] ��稭�: ����� ����� ����� ���� ��ࢠ� ⮫쪮 ��ᨫ��⢥��� ( �  ��ࠬ��஬ /f ).
+[PROCMAN] 
+[PROCMAN] [2m2025-11-23T15:36:41.541025Z[0m [32m INFO[0m ThreadId(09) Process terminated: testexe
+[PROCMAN] [2m2025-11-23T15:36:41.541039Z[0m [32m INFO[0m ThreadId(09) Process control stopped successfully: testexe
+✓ Restart request queued
+
+Step 6: Waiting for automatic restart to complete...
+[PROCMAN] [2m2025-11-23T15:36:43.543989Z[0m [32m INFO[0m ThreadId(07) Starting process control: testexe
+[PROCMAN] [2m2025-11-23T15:36:43.544156Z[0m [32m INFO[0m ThreadId(07) Spawning process: testexe
+[PROCMAN] [2m2025-11-23T15:36:43.560218Z[0m [32m INFO[0m ThreadId(07) Process spawned successfully: testexe (PID: 19324)
+[PROCMAN] [2m2025-11-23T15:36:43.560297Z[0m [32m INFO[0m ThreadId(07) Starting health monitor for testexe (type: process)
+[PROCMAN] [2m2025-11-23T15:36:43.560374Z[0m [32m INFO[0m ThreadId(07) Health monitor started for testexe
+[PROCMAN] [2m2025-11-23T15:36:43.560390Z[0m [32m INFO[0m ThreadId(07) Health check task spawned for testexe
+[PROCMAN] [2m2025-11-23T15:36:43.560405Z[0m [32m INFO[0m ThreadId(07) Spawning resource monitor task for testexe (PID: 19324)
+[PROCMAN] [2m2025-11-23T15:36:43.560424Z[0m [32m INFO[0m ThreadId(07) Spawning violation handler task for testexe
+[PROCMAN] [2m2025-11-23T15:36:43.560446Z[0m [32m INFO[0m ThreadId(07) Restart handler monitoring task spawned for testexe
+[PROCMAN] [2m2025-11-23T15:36:43.560471Z[0m [32m INFO[0m ThreadId(07) Process control started successfully: testexe
+[PROCMAN] [2m2025-11-23T15:36:43.560483Z[0m [32m INFO[0m ThreadId(06) Health check loop started for testexe (PID: 19324, interval: 1s, failure_threshold: 3)
+[PROCMAN] [2m2025-11-23T15:36:43.560497Z[0m [32m INFO[0m ThreadId(07) Circuit breaker reset
+[PROCMAN] [2m2025-11-23T15:36:43.560564Z[0m [32m INFO[0m ThreadId(07) Process control restarted successfully: testexe
+[PROCMAN] [2m2025-11-23T15:36:43.560557Z[0m [32m INFO[0m ThreadId(05) Exit monitor started for process testexe (PID: 19324)
+[PROCMAN] [2m2025-11-23T15:36:43.560581Z[0m [32m INFO[0m ThreadId(07) ✅ Automatic restart succeeded for testexe (trigger: ResourceViolation)
+[PROCMAN] [2m2025-11-23T15:36:43.560614Z[0m [32m INFO[0m ThreadId(06) 🔍 Running health check for testexe (PID: 19324)
+[PROCMAN] [2m2025-11-23T15:36:43.560643Z[0m [32m INFO[0m ThreadId(07) Processed 1 restart request(s) for testexe
+[PROCMAN] [2m2025-11-23T15:36:43.560680Z[0m [32m INFO[0m ThreadId(06) 💓 Process health check result for testexe: healthy=true, error=None
+[PROCMAN] [2m2025-11-23T15:36:43.560694Z[0m [32m INFO[0m ThreadId(07) 🔄 Processed 1 automatic restart(s) for testexe
+[PROCMAN] [2m2025-11-23T15:36:43.560744Z[0m [32m INFO[0m ThreadId(07) ⏰ Heartbeat: Checking for pending restarts for testexe
+[PROCMAN] [2m2025-11-23T15:36:43.575641Z[0m [32m INFO[0m ThreadId(06) 💾 Memory limit configured for testexe: 100 MB (policy: Restart)
+Process spawn count: 2
+✓ Process restarted after memory violation
+
+
+📊 Test Summary:
+  - Process started: ✓
+  - Memory allocated: ✓
+  - Resource monitoring: ✓
+  - Violation detected: ✓
+  - Restart queued: ✓
+  - Process restarted: ✓
+Sending termination signal to PROCMAN...
+PROCMAN exited with status: exit code: 1
+
+========================================
+✓ TEST COMPLETED: Memory Limit Violation
+(Check summary above for feature status)
+========================================
+
+Test artifacts preserved at: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-memory-limit\run-1763912189
+ok
+
+test result: ok. 4 passed; 0 failed; 4 ignored; 0 measured; 0 filtered out; finished in 33.94s
+
+
+running 1 test
+test test_forced_stop ... 
+========================================
+TEST: Forced Stop
+========================================
+
+=== Test Executor Setup ===
+Test: forced-stop
+Test dir: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-forced-stop\run-1763912205
+PROCMAN: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\hsu-process-manager.exe
+TESTEXE: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\testexe.exe
+===========================
+
+Created test config at: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-forced-stop\run-1763912205\config.yaml
+Starting PROCMAN: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\hsu-process-manager.exe
+Config: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-forced-stop\run-1763912205\config.yaml
+Working dir: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-forced-stop\run-1763912205
+PROCMAN started with PID: Some(16624)
+[PROCMAN] [2m2025-11-23T15:36:45.696481Z[0m [32m INFO[0m ThreadId(01) Starting HSU Process Manager (Rust implementation)
+[PROCMAN] [2m2025-11-23T15:36:45.696894Z[0m [32m INFO[0m ThreadId(01) Config file: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-forced-stop\run-1763912205\config.yaml
+[PROCMAN] [2m2025-11-23T15:36:45.699509Z[0m [32m INFO[0m ThreadId(01) Loaded configuration for 1 processes
+[PROCMAN] [2m2025-11-23T15:36:45.699561Z[0m [32m INFO[0m ThreadId(01) Creating process manager with 1 processes
+[PROCMAN] [2m2025-11-23T15:36:45.977712Z[0m [32m INFO[0m ThreadId(01) Initialized process: testexe
+[PROCMAN] [2m2025-11-23T15:36:45.977801Z[0m [32m INFO[0m ThreadId(01) Scanning for existing processes to reattach
+[PROCMAN] [2m2025-11-23T15:36:45.981969Z[0m [32m INFO[0m ThreadId(01) Found existing process: testexe (PID: 22944)
+[PROCMAN] [2m2025-11-23T15:36:45.982291Z[0m [32m INFO[0m ThreadId(01) Reattachment scan complete: 1 reattached, 0 cleaned up
+[PROCMAN] [2m2025-11-23T15:36:45.982317Z[0m [32m INFO[0m ThreadId(01) Starting process manager
+[PROCMAN] [2m2025-11-23T15:36:45.982341Z[0m [32m INFO[0m ThreadId(01) Starting process: testexe
+[PROCMAN] [2m2025-11-23T15:36:45.982363Z[0m [32m INFO[0m ThreadId(01) Starting process control: testexe
+[PROCMAN] [2m2025-11-23T15:36:45.982385Z[0m [32m INFO[0m ThreadId(01) Spawning process: testexe
+PROCMAN is ready
+Step 1: Waiting for TESTEXE to be running...
+[PROCMAN] [2m2025-11-23T15:36:45.988928Z[0m [32m INFO[0m ThreadId(01) Process spawned successfully: testexe (PID: 19140)
+[PROCMAN] [2m2025-11-23T15:36:45.989059Z[0m [32m INFO[0m ThreadId(01) Starting health monitor for testexe (type: process)
+[PROCMAN] [2m2025-11-23T15:36:45.989129Z[0m [32m INFO[0m ThreadId(01) Health monitor started for testexe
+[PROCMAN] [2m2025-11-23T15:36:45.989162Z[0m [32m INFO[0m ThreadId(01) Health check task spawned for testexe
+[PROCMAN] [2m2025-11-23T15:36:45.989175Z[0m [32m INFO[0m ThreadId(01) Spawning resource monitor task for testexe (PID: 19140)
+[PROCMAN] [2m2025-11-23T15:36:45.989194Z[0m [32m INFO[0m ThreadId(01) Spawning violation handler task for testexe
+[PROCMAN] [2m2025-11-23T15:36:45.989200Z[0m [32m INFO[0m ThreadId(09) Exit monitor started for process testexe (PID: 19140)
+[PROCMAN] [2m2025-11-23T15:36:45.989221Z[0m [32m INFO[0m ThreadId(01) Restart handler monitoring task spawned for testexe
+[PROCMAN] [2m2025-11-23T15:36:45.989266Z[0m [32m INFO[0m ThreadId(01) Process control started successfully: testexe
+[PROCMAN] [2m2025-11-23T15:36:45.989256Z[0m [32m INFO[0m ThreadId(08) Health check loop started for testexe (PID: 19140, interval: 1s, failure_threshold: 3)
+[PROCMAN] [2m2025-11-23T15:36:45.990011Z[0m [32m INFO[0m ThreadId(01) Process started successfully: testexe
+[PROCMAN] [2m2025-11-23T15:36:45.990053Z[0m [32m INFO[0m ThreadId(01) Process manager started successfully
+[PROCMAN] [2m2025-11-23T15:36:45.990077Z[0m [32m INFO[0m ThreadId(01) Heartbeat task spawned for automatic restart processing
+[PROCMAN] [2m2025-11-23T15:36:45.990089Z[0m [32m INFO[0m ThreadId(01) Process manager started successfully
+[PROCMAN] [2m2025-11-23T15:36:45.994869Z[0m [32m INFO[0m ThreadId(08) 🔍 Running health check for testexe (PID: 19140)
+[PROCMAN] [2m2025-11-23T15:36:45.994938Z[0m [32m INFO[0m ThreadId(08) 💓 Process health check result for testexe: healthy=true, error=None
+[PROCMAN] [2m2025-11-23T15:36:45.994915Z[0m [32m INFO[0m ThreadId(05) ⏰ Heartbeat: Checking for pending restarts for testexe
+[PROCMAN] [2m2025-11-23T15:36:45.997478Z[0m [33m WARN[0m ThreadId(09) Process testexe (PID: 19140) exited with non-zero status: Some(2)
+[PROCMAN] [2m2025-11-23T15:36:45.997519Z[0m [32m INFO[0m ThreadId(09) Exit monitor completed for process testexe (PID: 19140)
+Process 'testexe' is running
+✓ TESTEXE is running
+
+Step 2: Letting TESTEXE run for 1 second...
+✓ TESTEXE has been running
+
+Step 3: PROCMAN will force-kill with short timeout...
+Sending termination signal to PROCMAN...
+[PROCMAN] [2m2025-11-23T15:36:47.005407Z[0m [32m INFO[0m ThreadId(07) 🔍 Running health check for testexe (PID: 19140)
+[PROCMAN] [2m2025-11-23T15:36:47.005659Z[0m [32m INFO[0m ThreadId(07) Process 19140 has exited (Windows: exit_code=2, result=1)
+[PROCMAN] [2m2025-11-23T15:36:47.005716Z[0m [32m INFO[0m ThreadId(07) 💓 Process health check result for testexe: healthy=false, error=Some("Process 19140 has exited (exit code: 2)")
+[PROCMAN] [2m2025-11-23T15:36:47.005778Z[0m [33m WARN[0m ThreadId(07) ❌ Health check failed for testexe: consecutive failures = 1/3, reason: Process 19140 has exited (exit code: 2)
+PROCMAN exited with status: exit code: 1
+
+========================================
+✓ TEST PASSED: Forced Stop
+========================================
+
+Test artifacts preserved at: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-forced-stop\run-1763912205
+ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.92s
+
+
+running 2 tests
+test test_graceful_stop ... 
+========================================
+TEST: Graceful Stop
+========================================
+
+=== Test Executor Setup ===
+Test: graceful-stop
+Test dir: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-graceful-stop\run-1763912207
+PROCMAN: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\hsu-process-manager.exe
+TESTEXE: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\testexe.exe
+===========================
+
+Created test config at: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-graceful-stop\run-1763912207\config.yaml
+Starting PROCMAN: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\hsu-process-manager.exe
+Config: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-graceful-stop\run-1763912207\config.yaml
+Working dir: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-graceful-stop\run-1763912207
+PROCMAN started with PID: Some(31200)
+[PROCMAN] [2m2025-11-23T15:36:47.761667Z[0m [32m INFO[0m ThreadId(01) Starting HSU Process Manager (Rust implementation)
+[PROCMAN] [2m2025-11-23T15:36:47.762281Z[0m [32m INFO[0m ThreadId(01) Config file: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-graceful-stop\run-1763912207\config.yaml
+[PROCMAN] [2m2025-11-23T15:36:47.764912Z[0m [32m INFO[0m ThreadId(01) Loaded configuration for 1 processes
+[PROCMAN] [2m2025-11-23T15:36:47.764959Z[0m [32m INFO[0m ThreadId(01) Creating process manager with 1 processes
+[PROCMAN] [2m2025-11-23T15:36:48.039973Z[0m [32m INFO[0m ThreadId(01) Initialized process: testexe
+[PROCMAN] [2m2025-11-23T15:36:48.040085Z[0m [32m INFO[0m ThreadId(01) Scanning for existing processes to reattach
+[PROCMAN] [2m2025-11-23T15:36:48.043111Z[0m [32m INFO[0m ThreadId(01) Found existing process: testexe (PID: 19140)
+[PROCMAN] [2m2025-11-23T15:36:48.045818Z[0m [32m INFO[0m ThreadId(01) Reattachment scan complete: 1 reattached, 0 cleaned up
+[PROCMAN] [2m2025-11-23T15:36:48.045890Z[0m [32m INFO[0m ThreadId(01) Starting process manager
+[PROCMAN] [2m2025-11-23T15:36:48.045946Z[0m [32m INFO[0m ThreadId(01) Starting process: testexe
+[PROCMAN] [2m2025-11-23T15:36:48.045983Z[0m [32m INFO[0m ThreadId(01) Starting process control: testexe
+[PROCMAN] [2m2025-11-23T15:36:48.046014Z[0m [32m INFO[0m ThreadId(01) Spawning process: testexe
+PROCMAN is ready
+Step 1: Waiting for TESTEXE to be running...
+[PROCMAN] [2m2025-11-23T15:36:48.054072Z[0m [32m INFO[0m ThreadId(01) Process spawned successfully: testexe (PID: 20260)
+[PROCMAN] [2m2025-11-23T15:36:48.054218Z[0m [32m INFO[0m ThreadId(01) Starting health monitor for testexe (type: process)
+[PROCMAN] [2m2025-11-23T15:36:48.054279Z[0m [32m INFO[0m ThreadId(01) Health monitor started for testexe
+[PROCMAN] [2m2025-11-23T15:36:48.054297Z[0m [32m INFO[0m ThreadId(01) Health check task spawned for testexe
+[PROCMAN] [2m2025-11-23T15:36:48.054286Z[0m [32m INFO[0m ThreadId(09) Exit monitor started for process testexe (PID: 20260)
+[PROCMAN] [2m2025-11-23T15:36:48.054316Z[0m [32m INFO[0m ThreadId(01) Spawning resource monitor task for testexe (PID: 20260)
+[PROCMAN] [2m2025-11-23T15:36:48.054347Z[0m [32m INFO[0m ThreadId(08) Health check loop started for testexe (PID: 20260, interval: 1s, failure_threshold: 3)
+[PROCMAN] [2m2025-11-23T15:36:48.054379Z[0m [32m INFO[0m ThreadId(01) Spawning violation handler task for testexe
+[PROCMAN] [2m2025-11-23T15:36:48.054420Z[0m [32m INFO[0m ThreadId(01) Restart handler monitoring task spawned for testexe
+[PROCMAN] [2m2025-11-23T15:36:48.054440Z[0m [32m INFO[0m ThreadId(01) Process control started successfully: testexe
+[PROCMAN] [2m2025-11-23T15:36:48.055113Z[0m [32m INFO[0m ThreadId(01) Process started successfully: testexe
+[PROCMAN] [2m2025-11-23T15:36:48.055151Z[0m [32m INFO[0m ThreadId(01) Process manager started successfully
+[PROCMAN] [2m2025-11-23T15:36:48.055176Z[0m [32m INFO[0m ThreadId(01) Heartbeat task spawned for automatic restart processing
+[PROCMAN] [2m2025-11-23T15:36:48.055189Z[0m [32m INFO[0m ThreadId(01) Process manager started successfully
+[PROCMAN] [2m2025-11-23T15:36:48.060992Z[0m [32m INFO[0m ThreadId(03) ⏰ Heartbeat: Checking for pending restarts for testexe
+[PROCMAN] [2m2025-11-23T15:36:48.061089Z[0m [32m INFO[0m ThreadId(07) 🔍 Running health check for testexe (PID: 20260)
+[PROCMAN] [2m2025-11-23T15:36:48.061161Z[0m [32m INFO[0m ThreadId(07) 💓 Process health check result for testexe: healthy=true, error=None
+[PROCMAN] [2m2025-11-23T15:36:48.063261Z[0m [33m WARN[0m ThreadId(08) Process testexe (PID: 20260) exited with non-zero status: Some(2)
+[PROCMAN] [2m2025-11-23T15:36:48.063301Z[0m [32m INFO[0m ThreadId(08) Exit monitor completed for process testexe (PID: 20260)
+Process 'testexe' is running
+✓ TESTEXE is running
+
+Step 2: Letting TESTEXE run for 2 seconds...
+✓ TESTEXE has been running
+
+Step 3: PROCMAN will send shutdown signal...
+Sending termination signal to PROCMAN...
+[PROCMAN] [2m2025-11-23T15:36:49.060256Z[0m [32m INFO[0m ThreadId(07) 🔍 Running health check for testexe (PID: 20260)
+[PROCMAN] [2m2025-11-23T15:36:49.060511Z[0m [32m INFO[0m ThreadId(07) Process 20260 has exited (Windows: exit_code=2, result=1)
+[PROCMAN] [2m2025-11-23T15:36:49.060581Z[0m [32m INFO[0m ThreadId(07) 💓 Process health check result for testexe: healthy=false, error=Some("Process 20260 has exited (exit code: 2)")
+[PROCMAN] [2m2025-11-23T15:36:49.060712Z[0m [33m WARN[0m ThreadId(07) ❌ Health check failed for testexe: consecutive failures = 1/3, reason: Process 20260 has exited (exit code: 2)
+[PROCMAN] [2m2025-11-23T15:36:50.056438Z[0m [32m INFO[0m ThreadId(03) ⏰ Heartbeat: Checking for pending restarts for testexe
+[PROCMAN] [2m2025-11-23T15:36:50.056452Z[0m [32m INFO[0m ThreadId(07) 🔍 Running health check for testexe (PID: 20260)
+[PROCMAN] [2m2025-11-23T15:36:50.056565Z[0m [32m INFO[0m ThreadId(07) Process 20260 has exited (Windows: exit_code=2, result=1)
+[PROCMAN] [2m2025-11-23T15:36:50.056584Z[0m [32m INFO[0m ThreadId(07) 💓 Process health check result for testexe: healthy=false, error=Some("Process 20260 has exited (exit code: 2)")
+[PROCMAN] [2m2025-11-23T15:36:50.056601Z[0m [33m WARN[0m ThreadId(07) ❌ Health check failed for testexe: consecutive failures = 2/3, reason: Process 20260 has exited (exit code: 2)
+PROCMAN exited with status: exit code: 1
+
+========================================
+✓ TEST PASSED: Graceful Stop
+========================================
+
+Test artifacts preserved at: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-graceful-stop\run-1763912207
+ok
+test test_graceful_stop_detailed ... ignored
+
+test result: ok. 1 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 2.92s
+
+
+running 2 tests
+test test_health_restart ... 
+========================================
+TEST: Health Check Restart
+========================================
+
+=== Test Executor Setup ===
+Test: health-restart
+Test dir: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-health-restart\run-1763912210
+PROCMAN: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\hsu-process-manager.exe
+TESTEXE: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\testexe.exe
+===========================
+
+Created test config at: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-health-restart\run-1763912210\config.yaml
+Starting PROCMAN: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\hsu-process-manager.exe
+Config: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-health-restart\run-1763912210\config.yaml
+Working dir: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-health-restart\run-1763912210
+PROCMAN started with PID: Some(1468)
+[PROCMAN] [2m2025-11-23T15:36:50.792876Z[0m [32m INFO[0m ThreadId(01) Starting HSU Process Manager (Rust implementation)
+[PROCMAN] [2m2025-11-23T15:36:50.793233Z[0m [32m INFO[0m ThreadId(01) Config file: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-health-restart\run-1763912210\config.yaml
+[PROCMAN] [2m2025-11-23T15:36:50.795943Z[0m [32m INFO[0m ThreadId(01) Loaded configuration for 1 processes
+[PROCMAN] [2m2025-11-23T15:36:50.796006Z[0m [32m INFO[0m ThreadId(01) Creating process manager with 1 processes
+[PROCMAN] [2m2025-11-23T15:36:51.065680Z[0m [32m INFO[0m ThreadId(01) Initialized process: testexe
+[PROCMAN] [2m2025-11-23T15:36:51.065764Z[0m [32m INFO[0m ThreadId(01) Scanning for existing processes to reattach
+[PROCMAN] [2m2025-11-23T15:36:51.069557Z[0m [32m INFO[0m ThreadId(01) Found existing process: testexe (PID: 20260)
+[PROCMAN] [2m2025-11-23T15:36:51.071403Z[0m [32m INFO[0m ThreadId(01) Reattachment scan complete: 1 reattached, 0 cleaned up
+[PROCMAN] [2m2025-11-23T15:36:51.071427Z[0m [32m INFO[0m ThreadId(01) Starting process manager
+[PROCMAN] [2m2025-11-23T15:36:51.071450Z[0m [32m INFO[0m ThreadId(01) Starting process: testexe
+[PROCMAN] [2m2025-11-23T15:36:51.071472Z[0m [32m INFO[0m ThreadId(01) Starting process control: testexe
+[PROCMAN] [2m2025-11-23T15:36:51.071493Z[0m [32m INFO[0m ThreadId(01) Spawning process: testexe
+[PROCMAN] [2m2025-11-23T15:36:51.077675Z[0m [32m INFO[0m ThreadId(01) Process spawned successfully: testexe (PID: 32440)
+[PROCMAN] [2m2025-11-23T15:36:51.077786Z[0m [32m INFO[0m ThreadId(01) Starting health monitor for testexe (type: process)
+[PROCMAN] [2m2025-11-23T15:36:51.077855Z[0m [32m INFO[0m ThreadId(01) Health monitor started for testexe
+[PROCMAN] [2m2025-11-23T15:36:51.077869Z[0m [32m INFO[0m ThreadId(01) Health check task spawned for testexe
+[PROCMAN] [2m2025-11-23T15:36:51.077881Z[0m [32m INFO[0m ThreadId(01) Spawning resource monitor task for testexe (PID: 32440)
+[PROCMAN] [2m2025-11-23T15:36:51.077902Z[0m [32m INFO[0m ThreadId(01) Spawning violation handler task for testexe
+[PROCMAN] [2m2025-11-23T15:36:51.077939Z[0m [32m INFO[0m ThreadId(01) Restart handler monitoring task spawned for testexe
+[PROCMAN] [2m2025-11-23T15:36:51.077953Z[0m [32m INFO[0m ThreadId(01) Process control started successfully: testexe
+[PROCMAN] [2m2025-11-23T15:36:51.077970Z[0m [32m INFO[0m ThreadId(09) Exit monitor started for process testexe (PID: 32440)
+[PROCMAN] [2m2025-11-23T15:36:51.078028Z[0m [32m INFO[0m ThreadId(08) Health check loop started for testexe (PID: 32440, interval: 1s, failure_threshold: 3)
+[PROCMAN] [2m2025-11-23T15:36:51.078623Z[0m [32m INFO[0m ThreadId(01) Process started successfully: testexe
+[PROCMAN] [2m2025-11-23T15:36:51.078672Z[0m [32m INFO[0m ThreadId(01) Process manager started successfully
+[PROCMAN] [2m2025-11-23T15:36:51.078700Z[0m [32m INFO[0m ThreadId(01) Heartbeat task spawned for automatic restart processing
+[PROCMAN] [2m2025-11-23T15:36:51.078726Z[0m [32m INFO[0m ThreadId(01) Process manager started successfully
+PROCMAN is ready
+Step 1: Waiting for TESTEXE first run...
+Process 'testexe' is running
+✓ TESTEXE first run started
+
+Step 2: Waiting for TESTEXE to exit after 3 seconds...
+[PROCMAN] [2m2025-11-23T15:36:51.082488Z[0m [32m INFO[0m ThreadId(02) ⏰ Heartbeat: Checking for pending restarts for testexe
+[PROCMAN] [2m2025-11-23T15:36:51.082593Z[0m [32m INFO[0m ThreadId(02) 🔍 Running health check for testexe (PID: 32440)
+[PROCMAN] [2m2025-11-23T15:36:51.082669Z[0m [32m INFO[0m ThreadId(02) 💓 Process health check result for testexe: healthy=true, error=None
+[PROCMAN] [2m2025-11-23T15:36:52.082323Z[0m [32m INFO[0m ThreadId(07) 🔍 Running health check for testexe (PID: 32440)
+[PROCMAN] [2m2025-11-23T15:36:52.082498Z[0m [32m INFO[0m ThreadId(07) 💓 Process health check result for testexe: healthy=true, error=None
+[PROCMAN] [2m2025-11-23T15:36:53.078839Z[0m [32m INFO[0m ThreadId(07) 🔍 Running health check for testexe (PID: 32440)
+[PROCMAN] [2m2025-11-23T15:36:53.079013Z[0m [32m INFO[0m ThreadId(07) 💓 Process health check result for testexe: healthy=true, error=None
+[PROCMAN] [2m2025-11-23T15:36:53.094851Z[0m [32m INFO[0m ThreadId(06) ⏰ Heartbeat: Checking for pending restarts for testexe
+[PROCMAN] [2m2025-11-23T15:36:54.094188Z[0m [32m INFO[0m ThreadId(06) 🔍 Running health check for testexe (PID: 32440)
+[PROCMAN] [2m2025-11-23T15:36:54.094303Z[0m [32m INFO[0m ThreadId(06) 💓 Process health check result for testexe: healthy=true, error=None
+⚠ No exit message found in logs
+Step 3: Waiting for PROCMAN to restart TESTEXE...
+[PROCMAN] [2m2025-11-23T15:36:55.090057Z[0m [32m INFO[0m ThreadId(07) 🔍 Running health check for testexe (PID: 32440)
+[PROCMAN] [2m2025-11-23T15:36:55.090044Z[0m [32m INFO[0m ThreadId(06) ⏰ Heartbeat: Checking for pending restarts for testexe
+[PROCMAN] [2m2025-11-23T15:36:55.090122Z[0m [32m INFO[0m ThreadId(07) 💓 Process health check result for testexe: healthy=true, error=None
+[PROCMAN] [2m2025-11-23T15:36:55.202018Z[0m [32m INFO[0m ThreadId(07) Process testexe (PID: 32440) exited successfully with code: Some(0)
+[PROCMAN] [2m2025-11-23T15:36:55.202070Z[0m [32m INFO[0m ThreadId(07) Exit monitor completed for process testexe (PID: 32440)
+[PROCMAN] [2m2025-11-23T15:36:56.086470Z[0m [32m INFO[0m ThreadId(08) 🔍 Running health check for testexe (PID: 32440)
+[PROCMAN] [2m2025-11-23T15:36:56.086700Z[0m [32m INFO[0m ThreadId(08) Process 32440 has exited (Windows: exit_code=0, result=1)
+[PROCMAN] [2m2025-11-23T15:36:56.086752Z[0m [32m INFO[0m ThreadId(08) 💓 Process health check result for testexe: healthy=false, error=Some("Process 32440 has exited (exit code: 0)")
+[PROCMAN] [2m2025-11-23T15:36:56.086840Z[0m [33m WARN[0m ThreadId(08) ❌ Health check failed for testexe: consecutive failures = 1/3, reason: Process 32440 has exited (exit code: 0)
+[PROCMAN] [2m2025-11-23T15:36:57.082842Z[0m [32m INFO[0m ThreadId(08) ⏰ Heartbeat: Checking for pending restarts for testexe
+[PROCMAN] [2m2025-11-23T15:36:57.082922Z[0m [32m INFO[0m ThreadId(06) 🔍 Running health check for testexe (PID: 32440)
+[PROCMAN] [2m2025-11-23T15:36:57.083109Z[0m [32m INFO[0m ThreadId(06) Process 32440 has exited (Windows: exit_code=0, result=1)
+[PROCMAN] [2m2025-11-23T15:36:57.083151Z[0m [32m INFO[0m ThreadId(06) 💓 Process health check result for testexe: healthy=false, error=Some("Process 32440 has exited (exit code: 0)")
+[PROCMAN] [2m2025-11-23T15:36:57.083197Z[0m [33m WARN[0m ThreadId(06) ❌ Health check failed for testexe: consecutive failures = 2/3, reason: Process 32440 has exited (exit code: 0)
+✓ PROCMAN restarted TESTEXE
+
+Step 4: Verifying second instance is running...
+[PROCMAN] [2m2025-11-23T15:36:58.088691Z[0m [32m INFO[0m ThreadId(02) 🔍 Running health check for testexe (PID: 32440)
+[PROCMAN] [2m2025-11-23T15:36:58.088891Z[0m [32m INFO[0m ThreadId(02) Process 32440 has exited (Windows: exit_code=0, result=1)
+[PROCMAN] [2m2025-11-23T15:36:58.088965Z[0m [32m INFO[0m ThreadId(02) 💓 Process health check result for testexe: healthy=false, error=Some("Process 32440 has exited (exit code: 0)")
+[PROCMAN] [2m2025-11-23T15:36:58.089016Z[0m [33m WARN[0m ThreadId(02) ❌ Health check failed for testexe: consecutive failures = 3/3, reason: Process 32440 has exited (exit code: 0)
+[PROCMAN] [2m2025-11-23T15:36:58.089079Z[0m [31mERROR[0m ThreadId(02) 🚨 Health check failure threshold reached for testexe (failures: 3)
+[PROCMAN] [2m2025-11-23T15:36:58.089111Z[0m [32m INFO[0m ThreadId(02) 📞 Calling restart callback for testexe
+[PROCMAN] [2m2025-11-23T15:36:58.089158Z[0m [32m INFO[0m ThreadId(02) 🔔 Health restart callback invoked for testexe: Process 32440 has exited (exit code: 0)
+[PROCMAN] [2m2025-11-23T15:36:58.089207Z[0m [32m INFO[0m ThreadId(02) 🔧 Restart policy check for testexe: should_restart=true, circuit_breaker_tripped=false
+[PROCMAN] [2m2025-11-23T15:36:58.089248Z[0m [32m INFO[0m ThreadId(02) ✅ Health restart allowed, queueing restart request for testexe: Process 32440 has exited (exit code: 0)
+[PROCMAN] [2m2025-11-23T15:36:58.089291Z[0m [32m INFO[0m ThreadId(02) 📬 Restart request queued successfully for testexe
+[PROCMAN] [2m2025-11-23T15:36:58.089321Z[0m [32m INFO[0m ThreadId(02) ✅ Restart callback succeeded for testexe
+[PROCMAN] [2m2025-11-23T15:36:59.089277Z[0m [32m INFO[0m ThreadId(06) 🔍 Running health check for testexe (PID: 32440)
+[PROCMAN] [2m2025-11-23T15:36:59.089277Z[0m [32m INFO[0m ThreadId(08) Restart request(s) pending for testexe - will be processed on next heartbeat
+[PROCMAN] [2m2025-11-23T15:36:59.089293Z[0m [32m INFO[0m ThreadId(02) ⏰ Heartbeat: Checking for pending restarts for testexe
+[PROCMAN] [2m2025-11-23T15:36:59.089647Z[0m [32m INFO[0m ThreadId(02) 📦 Found pending restart request for testexe
+[PROCMAN] [2m2025-11-23T15:36:59.089527Z[0m [32m INFO[0m ThreadId(06) Process 32440 has exited (Windows: exit_code=0, result=1)
+[PROCMAN] [2m2025-11-23T15:36:59.089700Z[0m [32m INFO[0m ThreadId(02) 🔄 Processing restart request for testexe: Process 32440 has exited (exit code: 0) (trigger: HealthFailure)
+[PROCMAN] [2m2025-11-23T15:36:59.089901Z[0m [32m INFO[0m ThreadId(06) 💓 Process health check result for testexe: healthy=false, error=Some("Process 32440 has exited (exit code: 0)")
+[PROCMAN] [2m2025-11-23T15:36:59.089997Z[0m [32m INFO[0m ThreadId(02) Restarting process control: testexe (force: false)
+[PROCMAN] [2m2025-11-23T15:36:59.090005Z[0m [33m WARN[0m ThreadId(06) ❌ Health check failed for testexe: consecutive failures = 4/3, reason: Process 32440 has exited (exit code: 0)
+[PROCMAN] [2m2025-11-23T15:36:59.090082Z[0m [32m INFO[0m ThreadId(02) Stopping process control: testexe
+[PROCMAN] [2m2025-11-23T15:36:59.090283Z[0m [32m INFO[0m ThreadId(02) Terminating process: testexe
+[PROCMAN] [2m2025-11-23T15:36:59.090503Z[0m [32m INFO[0m ThreadId(02) Sending termination signal to PID 32440
+[PROCMAN] [2m2025-11-23T15:36:59.201054Z[0m [33m WARN[0m ThreadId(02) taskkill returned non-zero status for PID 32440: �訡��: �� 㤠���� ���� ����� "32440".
+[PROCMAN] 
+[PROCMAN] [2m2025-11-23T15:36:59.201108Z[0m [32m INFO[0m ThreadId(02) Process terminated: testexe
+[PROCMAN] [2m2025-11-23T15:36:59.201122Z[0m [32m INFO[0m ThreadId(02) Process control stopped successfully: testexe
+[PROCMAN] [2m2025-11-23T15:37:01.213712Z[0m [32m INFO[0m ThreadId(07) Starting process control: testexe
+[PROCMAN] [2m2025-11-23T15:37:01.213856Z[0m [32m INFO[0m ThreadId(07) Spawning process: testexe
+[PROCMAN] [2m2025-11-23T15:37:01.229299Z[0m [32m INFO[0m ThreadId(07) Process spawned successfully: testexe (PID: 22556)
+[PROCMAN] [2m2025-11-23T15:37:01.229378Z[0m [32m INFO[0m ThreadId(07) Starting health monitor for testexe (type: process)
+[PROCMAN] [2m2025-11-23T15:37:01.229457Z[0m [32m INFO[0m ThreadId(07) Health monitor started for testexe
+[PROCMAN] [2m2025-11-23T15:37:01.229480Z[0m [32m INFO[0m ThreadId(07) Health check task spawned for testexe
+[PROCMAN] [2m2025-11-23T15:37:01.229494Z[0m [32m INFO[0m ThreadId(06) Exit monitor started for process testexe (PID: 22556)
+[PROCMAN] [2m2025-11-23T15:37:01.229501Z[0m [32m INFO[0m ThreadId(07) Spawning resource monitor task for testexe (PID: 22556)
+[PROCMAN] [2m2025-11-23T15:37:01.229544Z[0m [32m INFO[0m ThreadId(07) Spawning violation handler task for testexe
+[PROCMAN] [2m2025-11-23T15:37:01.229585Z[0m [32m INFO[0m ThreadId(07) Restart handler monitoring task spawned for testexe
+[PROCMAN] [2m2025-11-23T15:37:01.229610Z[0m [32m INFO[0m ThreadId(07) Process control started successfully: testexe
+[PROCMAN] [2m2025-11-23T15:37:01.229607Z[0m [32m INFO[0m ThreadId(06) Health check loop started for testexe (PID: 22556, interval: 1s, failure_threshold: 3)
+[PROCMAN] [2m2025-11-23T15:37:01.229646Z[0m [32m INFO[0m ThreadId(07) Circuit breaker reset
+[PROCMAN] [2m2025-11-23T15:37:01.229671Z[0m [32m INFO[0m ThreadId(07) Process control restarted successfully: testexe
+[PROCMAN] [2m2025-11-23T15:37:01.229692Z[0m [32m INFO[0m ThreadId(07) ✅ Automatic restart succeeded for testexe (trigger: HealthFailure)
+[PROCMAN] [2m2025-11-23T15:37:01.229721Z[0m [32m INFO[0m ThreadId(07) Processed 1 restart request(s) for testexe
+[PROCMAN] [2m2025-11-23T15:37:01.229746Z[0m [32m INFO[0m ThreadId(07) 🔄 Processed 1 automatic restart(s) for testexe
+[PROCMAN] [2m2025-11-23T15:37:01.229780Z[0m [32m INFO[0m ThreadId(07) ⏰ Heartbeat: Checking for pending restarts for testexe
+[PROCMAN] [2m2025-11-23T15:37:01.244588Z[0m [32m INFO[0m ThreadId(07) 🔍 Running health check for testexe (PID: 22556)
+[PROCMAN] [2m2025-11-23T15:37:01.244676Z[0m [32m INFO[0m ThreadId(07) 💓 Process health check result for testexe: healthy=true, error=None
+[PROCMAN] [2m2025-11-23T15:37:02.239863Z[0m [32m INFO[0m ThreadId(08) 🔍 Running health check for testexe (PID: 22556)
+[PROCMAN] [2m2025-11-23T15:37:02.240022Z[0m [32m INFO[0m ThreadId(08) 💓 Process health check result for testexe: healthy=true, error=None
+Process spawn count: 2
+✓ Second instance confirmed (spawn count: 2)
+
+Sending termination signal to PROCMAN...
+PROCMAN exited with status: exit code: 1
+
+========================================
+✓ TEST PASSED: Health Check Restart
+========================================
+
+Test artifacts preserved at: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-health-restart\run-1763912210
+ok
+test test_max_restart_attempts ... ignored
+
+test result: ok. 1 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 12.82s
+
+
+running 3 tests
+test test_cpu_limit_warning ... ignored
+test test_memory_growth_violation ... ignored
+test test_memory_limit_violation ... 
+========================================
+TEST: Memory Limit Violation
+========================================
+
+=== Test Executor Setup ===
+Test: memory-limit
+Test dir: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-memory-limit\run-1763912223
+PROCMAN: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\hsu-process-manager.exe
+TESTEXE: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\testexe.exe
+===========================
+
+Created test config at: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-memory-limit\run-1763912223\config.yaml
+Starting PROCMAN: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\hsu-process-manager.exe
+Config: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-memory-limit\run-1763912223\config.yaml
+Working dir: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-memory-limit\run-1763912223
+PROCMAN started with PID: Some(27132)
+[PROCMAN] [2m2025-11-23T15:37:03.767639Z[0m [32m INFO[0m ThreadId(01) Starting HSU Process Manager (Rust implementation)
+[PROCMAN] [2m2025-11-23T15:37:03.767973Z[0m [32m INFO[0m ThreadId(01) Config file: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-memory-limit\run-1763912223\config.yaml
+[PROCMAN] [2m2025-11-23T15:37:03.770518Z[0m [32m INFO[0m ThreadId(01) Loaded configuration for 1 processes
+[PROCMAN] [2m2025-11-23T15:37:03.770564Z[0m [32m INFO[0m ThreadId(01) Creating process manager with 1 processes
+[PROCMAN] [2m2025-11-23T15:37:04.048840Z[0m [32m INFO[0m ThreadId(01) Initialized process: testexe
+[PROCMAN] [2m2025-11-23T15:37:04.048947Z[0m [32m INFO[0m ThreadId(01) Scanning for existing processes to reattach
+[PROCMAN] [2m2025-11-23T15:37:04.052199Z[0m [32m INFO[0m ThreadId(01) Found existing process: testexe (PID: 32440)
+[PROCMAN] [2m2025-11-23T15:37:04.054268Z[0m [32m INFO[0m ThreadId(01) Reattachment scan complete: 1 reattached, 0 cleaned up
+[PROCMAN] [2m2025-11-23T15:37:04.054298Z[0m [32m INFO[0m ThreadId(01) Starting process manager
+[PROCMAN] [2m2025-11-23T15:37:04.054321Z[0m [32m INFO[0m ThreadId(01) Starting process: testexe
+[PROCMAN] [2m2025-11-23T15:37:04.054343Z[0m [32m INFO[0m ThreadId(01) Starting process control: testexe
+[PROCMAN] [2m2025-11-23T15:37:04.054364Z[0m [32m INFO[0m ThreadId(01) Spawning process: testexe
+PROCMAN is ready
+Step 1: Waiting for TESTEXE to start...
+[PROCMAN] [2m2025-11-23T15:37:04.061922Z[0m [32m INFO[0m ThreadId(01) Process spawned successfully: testexe (PID: 32764)
+[PROCMAN] [2m2025-11-23T15:37:04.062025Z[0m [32m INFO[0m ThreadId(01) Starting health monitor for testexe (type: process)
+[PROCMAN] [2m2025-11-23T15:37:04.062089Z[0m [32m INFO[0m ThreadId(01) Health monitor started for testexe
+[PROCMAN] [2m2025-11-23T15:37:04.062110Z[0m [32m INFO[0m ThreadId(01) Health check task spawned for testexe
+[PROCMAN] [2m2025-11-23T15:37:04.062136Z[0m [32m INFO[0m ThreadId(01) Spawning resource monitor task for testexe (PID: 32764)
+[PROCMAN] [2m2025-11-23T15:37:04.062155Z[0m [32m INFO[0m ThreadId(01) Spawning violation handler task for testexe
+[PROCMAN] [2m2025-11-23T15:37:04.062165Z[0m [32m INFO[0m ThreadId(09) Exit monitor started for process testexe (PID: 32764)
+[PROCMAN] [2m2025-11-23T15:37:04.062186Z[0m [32m INFO[0m ThreadId(01) Restart handler monitoring task spawned for testexe
+[PROCMAN] [2m2025-11-23T15:37:04.062258Z[0m [32m INFO[0m ThreadId(01) Process control started successfully: testexe
+[PROCMAN] [2m2025-11-23T15:37:04.062217Z[0m [32m INFO[0m ThreadId(08) Health check loop started for testexe (PID: 32764, interval: 1s, failure_threshold: 3)
+[PROCMAN] [2m2025-11-23T15:37:04.062925Z[0m [32m INFO[0m ThreadId(01) Process started successfully: testexe
+[PROCMAN] [2m2025-11-23T15:37:04.062959Z[0m [32m INFO[0m ThreadId(01) Process manager started successfully
+[PROCMAN] [2m2025-11-23T15:37:04.062988Z[0m [32m INFO[0m ThreadId(01) Heartbeat task spawned for automatic restart processing
+[PROCMAN] [2m2025-11-23T15:37:04.063016Z[0m [32m INFO[0m ThreadId(01) Process manager started successfully
+[PROCMAN] [2m2025-11-23T15:37:04.066316Z[0m [32m INFO[0m ThreadId(05) 🔍 Running health check for testexe (PID: 32764)
+[PROCMAN] [2m2025-11-23T15:37:04.066353Z[0m [32m INFO[0m ThreadId(02) ⏰ Heartbeat: Checking for pending restarts for testexe
+[PROCMAN] [2m2025-11-23T15:37:04.066380Z[0m [32m INFO[0m ThreadId(05) 💓 Process health check result for testexe: healthy=true, error=None
+[PROCMAN] [2m2025-11-23T15:37:04.066574Z[0m [32m INFO[0m ThreadId(08) 💾 Memory limit configured for testexe: 100 MB (policy: Restart)
+Process 'testexe' is running
+✓ TESTEXE started
+
+Step 2: Waiting for memory allocation (150MB)...
+[PROCMAN] [2m2025-11-23T15:37:05.065110Z[0m [32m INFO[0m ThreadId(07) 🔍 Running health check for testexe (PID: 32764)
+[PROCMAN] [2m2025-11-23T15:37:05.065309Z[0m [32m INFO[0m ThreadId(07) 💓 Process health check result for testexe: healthy=true, error=None
+[PROCMAN] [2m2025-11-23T15:37:06.064652Z[0m [32m INFO[0m ThreadId(07) 🔍 Running health check for testexe (PID: 32764)
+[PROCMAN] [2m2025-11-23T15:37:06.064797Z[0m [32m INFO[0m ThreadId(02) ⏰ Heartbeat: Checking for pending restarts for testexe
+[PROCMAN] [2m2025-11-23T15:37:06.064896Z[0m [32m INFO[0m ThreadId(07) 💓 Process health check result for testexe: healthy=true, error=None
+[PROCMAN] [2m2025-11-23T15:37:07.064863Z[0m [32m INFO[0m ThreadId(05) 🔍 Running health check for testexe (PID: 32764)
+[PROCMAN] [2m2025-11-23T15:37:07.065158Z[0m [32m INFO[0m ThreadId(05) 💓 Process health check result for testexe: healthy=true, error=None
+✓ Memory allocation logged
+
+Step 3: Checking for resource monitoring...
+[PROCMAN] [2m2025-11-23T15:37:08.075758Z[0m [32m INFO[0m ThreadId(05) 🔍 Running health check for testexe (PID: 32764)
+[PROCMAN] [2m2025-11-23T15:37:08.075885Z[0m [32m INFO[0m ThreadId(08) ⏰ Heartbeat: Checking for pending restarts for testexe
+[PROCMAN] [2m2025-11-23T15:37:08.075953Z[0m [32m INFO[0m ThreadId(05) 💓 Process health check result for testexe: healthy=true, error=None
+[PROCMAN] [2m2025-11-23T15:37:09.077254Z[0m [32m INFO[0m ThreadId(02) 🔍 Running health check for testexe (PID: 32764)
+[PROCMAN] [2m2025-11-23T15:37:09.077438Z[0m [32m INFO[0m ThreadId(02) 💓 Process health check result for testexe: healthy=true, error=None
+[PROCMAN] [2m2025-11-23T15:37:10.078716Z[0m [32m INFO[0m ThreadId(02) 🔍 Running health check for testexe (PID: 32764)
+[PROCMAN] [2m2025-11-23T15:37:10.078858Z[0m [32m INFO[0m ThreadId(07) ⏰ Heartbeat: Checking for pending restarts for testexe
+[PROCMAN] [2m2025-11-23T15:37:10.078964Z[0m [32m INFO[0m ThreadId(02) 💓 Process health check result for testexe: healthy=true, error=None
+✓ Resource monitoring is active
+
+Step 4: Checking for memory violation detection...
+[PROCMAN] [2m2025-11-23T15:37:11.074661Z[0m [32m INFO[0m ThreadId(08) 🔍 Running health check for testexe (PID: 32764)
+[PROCMAN] [2m2025-11-23T15:37:11.074801Z[0m [32m INFO[0m ThreadId(08) 💓 Process health check result for testexe: healthy=true, error=None
+[PROCMAN] [2m2025-11-23T15:37:12.073329Z[0m [32m INFO[0m ThreadId(08) 🔍 Running health check for testexe (PID: 32764)
+[PROCMAN] [2m2025-11-23T15:37:12.073513Z[0m [32m INFO[0m ThreadId(05) ⏰ Heartbeat: Checking for pending restarts for testexe
+[PROCMAN] [2m2025-11-23T15:37:12.073557Z[0m [32m INFO[0m ThreadId(08) 💓 Process health check result for testexe: healthy=true, error=None
+[PROCMAN] [2m2025-11-23T15:37:13.071492Z[0m [32m INFO[0m ThreadId(07) 🔍 Running health check for testexe (PID: 32764)
+[PROCMAN] [2m2025-11-23T15:37:13.071655Z[0m [32m INFO[0m ThreadId(07) 💓 Process health check result for testexe: healthy=true, error=None
+✓ Memory violation detected in logs
+
+Step 5: Waiting for heartbeat to process violation...
+[PROCMAN] [2m2025-11-23T15:37:14.068003Z[0m [32m INFO[0m ThreadId(07) 🔍 Running health check for testexe (PID: 32764)
+[PROCMAN] [2m2025-11-23T15:37:14.068294Z[0m [32m INFO[0m ThreadId(02) ⏰ Heartbeat: Checking for pending restarts for testexe
+[PROCMAN] [2m2025-11-23T15:37:14.068294Z[0m [32m INFO[0m ThreadId(07) 💓 Process health check result for testexe: healthy=true, error=None
+[PROCMAN] [2m2025-11-23T15:37:14.068569Z[0m [32m INFO[0m ThreadId(05) 💾 Memory limit configured for testexe: 100 MB (policy: Restart)
+[PROCMAN] [2m2025-11-23T15:37:14.068748Z[0m [33m WARN[0m ThreadId(05) ⚠️  Detected 1 resource violation(s) for testexe
+[PROCMAN] [2m2025-11-23T15:37:14.068823Z[0m [32m INFO[0m ThreadId(05) 📤 Sending violation to handler: Memory → policy=Restart
+[PROCMAN] [2m2025-11-23T15:37:14.068953Z[0m [33m WARN[0m ThreadId(05) 🚨 Resource violation detected for process testexe: Memory usage 156 MB exceeds limit 100 MB (policy: Restart)
+[PROCMAN] [2m2025-11-23T15:37:14.069012Z[0m [31mERROR[0m ThreadId(05) 🔄 RESTART: Resource limit exceeded, triggering automatic restart (policy: restart): Memory usage 156 MB exceeds limit 100 MB
+[PROCMAN] [2m2025-11-23T15:37:14.069057Z[0m [32m INFO[0m ThreadId(05) 🔧 Resource violation restart policy check for testexe: should_restart=true, circuit_breaker_tripped=false
+[PROCMAN] [2m2025-11-23T15:37:14.069100Z[0m [32m INFO[0m ThreadId(05) ✅ Resource violation restart allowed, queueing restart request for testexe
+[PROCMAN] [2m2025-11-23T15:37:14.069143Z[0m [32m INFO[0m ThreadId(05) 📬 Resource violation restart request queued for testexe
+[PROCMAN] [2m2025-11-23T15:37:15.067812Z[0m [32m INFO[0m ThreadId(08) 🔍 Running health check for testexe (PID: 32764)
+[PROCMAN] [2m2025-11-23T15:37:15.067970Z[0m [32m INFO[0m ThreadId(08) 💓 Process health check result for testexe: healthy=true, error=None
+[PROCMAN] [2m2025-11-23T15:37:16.078184Z[0m [32m INFO[0m ThreadId(08) 🔍 Running health check for testexe (PID: 32764)
+[PROCMAN] [2m2025-11-23T15:37:16.078262Z[0m [32m INFO[0m ThreadId(07) Restart request(s) pending for testexe - will be processed on next heartbeat
+[PROCMAN] [2m2025-11-23T15:37:16.078285Z[0m [32m INFO[0m ThreadId(02) ⏰ Heartbeat: Checking for pending restarts for testexe
+[PROCMAN] [2m2025-11-23T15:37:16.078571Z[0m [32m INFO[0m ThreadId(02) 📦 Found pending restart request for testexe
+[PROCMAN] [2m2025-11-23T15:37:16.078357Z[0m [32m INFO[0m ThreadId(08) 💓 Process health check result for testexe: healthy=true, error=None
+[PROCMAN] [2m2025-11-23T15:37:16.078647Z[0m [32m INFO[0m ThreadId(02) 🔄 Processing restart request for testexe: Resource violation: Memory usage 156 MB exceeds limit 100 MB (trigger: ResourceViolation)
+[PROCMAN] [2m2025-11-23T15:37:16.079015Z[0m [32m INFO[0m ThreadId(02) Restarting process control: testexe (force: false)
+[PROCMAN] [2m2025-11-23T15:37:16.079096Z[0m [32m INFO[0m ThreadId(02) Stopping process control: testexe
+[PROCMAN] [2m2025-11-23T15:37:16.079267Z[0m [32m INFO[0m ThreadId(02) Terminating process: testexe
+[PROCMAN] [2m2025-11-23T15:37:16.079318Z[0m [32m INFO[0m ThreadId(02) Sending termination signal to PID 32764
+✓ Restart request queued
+
+Step 6: Waiting for automatic restart to complete...
+[PROCMAN] [2m2025-11-23T15:37:16.193075Z[0m [33m WARN[0m ThreadId(02) taskkill returned non-zero status for PID 32764: �訡��: �� 㤠���� �������� ����� � �����䨪��஬ 32764.
+[PROCMAN] ��稭�: ����� ����� ����� ���� ��ࢠ� ⮫쪮 ��ᨫ��⢥��� ( �  ��ࠬ��஬ /f ).
+[PROCMAN] 
+[PROCMAN] [2m2025-11-23T15:37:16.193161Z[0m [32m INFO[0m ThreadId(02) Process terminated: testexe
+[PROCMAN] [2m2025-11-23T15:37:16.193187Z[0m [32m INFO[0m ThreadId(02) Process control stopped successfully: testexe
+[PROCMAN] [2m2025-11-23T15:37:18.208324Z[0m [32m INFO[0m ThreadId(08) Starting process control: testexe
+[PROCMAN] [2m2025-11-23T15:37:18.208453Z[0m [32m INFO[0m ThreadId(08) Spawning process: testexe
+[PROCMAN] [2m2025-11-23T15:37:18.222406Z[0m [32m INFO[0m ThreadId(08) Process spawned successfully: testexe (PID: 15076)
+[PROCMAN] [2m2025-11-23T15:37:18.222484Z[0m [32m INFO[0m ThreadId(08) Starting health monitor for testexe (type: process)
+[PROCMAN] [2m2025-11-23T15:37:18.222548Z[0m [32m INFO[0m ThreadId(08) Health monitor started for testexe
+[PROCMAN] [2m2025-11-23T15:37:18.222563Z[0m [32m INFO[0m ThreadId(08) Health check task spawned for testexe
+[PROCMAN] [2m2025-11-23T15:37:18.222577Z[0m [32m INFO[0m ThreadId(08) Spawning resource monitor task for testexe (PID: 15076)
+[PROCMAN] [2m2025-11-23T15:37:18.222595Z[0m [32m INFO[0m ThreadId(08) Spawning violation handler task for testexe
+[PROCMAN] [2m2025-11-23T15:37:18.222615Z[0m [32m INFO[0m ThreadId(08) Restart handler monitoring task spawned for testexe
+[PROCMAN] [2m2025-11-23T15:37:18.222631Z[0m [32m INFO[0m ThreadId(08) Process control started successfully: testexe
+[PROCMAN] [2m2025-11-23T15:37:18.222629Z[0m [32m INFO[0m ThreadId(07) Exit monitor started for process testexe (PID: 15076)
+[PROCMAN] [2m2025-11-23T15:37:18.222661Z[0m [32m INFO[0m ThreadId(08) Circuit breaker reset
+[PROCMAN] [2m2025-11-23T15:37:18.222684Z[0m [32m INFO[0m ThreadId(08) Process control restarted successfully: testexe
+[PROCMAN] [2m2025-11-23T15:37:18.222700Z[0m [32m INFO[0m ThreadId(05) Health check loop started for testexe (PID: 15076, interval: 1s, failure_threshold: 3)
+[PROCMAN] [2m2025-11-23T15:37:18.222712Z[0m [32m INFO[0m ThreadId(08) ✅ Automatic restart succeeded for testexe (trigger: ResourceViolation)
+[PROCMAN] [2m2025-11-23T15:37:18.222778Z[0m [32m INFO[0m ThreadId(08) Processed 1 restart request(s) for testexe
+[PROCMAN] [2m2025-11-23T15:37:18.222802Z[0m [32m INFO[0m ThreadId(08) 🔄 Processed 1 automatic restart(s) for testexe
+[PROCMAN] [2m2025-11-23T15:37:18.222858Z[0m [32m INFO[0m ThreadId(08) ⏰ Heartbeat: Checking for pending restarts for testexe
+[PROCMAN] [2m2025-11-23T15:37:18.238292Z[0m [32m INFO[0m ThreadId(07) 🔍 Running health check for testexe (PID: 15076)
+[PROCMAN] [2m2025-11-23T15:37:18.238380Z[0m [32m INFO[0m ThreadId(07) 💓 Process health check result for testexe: healthy=true, error=None
+[PROCMAN] [2m2025-11-23T15:37:18.238401Z[0m [32m INFO[0m ThreadId(05) 💾 Memory limit configured for testexe: 100 MB (policy: Restart)
+Process spawn count: 2
+✓ Process restarted after memory violation
+
+
+📊 Test Summary:
+  - Process started: ✓
+  - Memory allocated: ✓
+  - Resource monitoring: ✓
+  - Violation detected: ✓
+  - Restart queued: ✓
+  - Process restarted: ✓
+Sending termination signal to PROCMAN...
+PROCMAN exited with status: exit code: 1
+
+========================================
+✓ TEST COMPLETED: Memory Limit Violation
+(Check summary above for feature status)
+========================================
+
+Test artifacts preserved at: C:\Projects\core-tools\current\hsu-procman-rust\target\debug\tmp\e2e-test-memory-limit\run-1763912223
+ok
+
+test result: ok. 1 passed; 0 failed; 2 ignored; 0 measured; 0 filtered out; finished in 15.93s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
