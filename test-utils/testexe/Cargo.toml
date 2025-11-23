@@ -10,6 +10,9 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
 sysinfo = "0.31"
 once_cell = "1.19"
+hyper = { version = "1.5", features = ["full"] }
+hyper-util = { version = "0.1", features = ["full", "tokio"] }
+http-body-util = "0.1"
 
 [target.'cfg(windows)'.dependencies]
 windows-sys = { version = "0.52", features = ["Win32_System_Console", "Win32_Foundation"] }

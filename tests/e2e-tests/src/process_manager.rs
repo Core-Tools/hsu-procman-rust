@@ -248,6 +248,38 @@ pub fn create_test_config(
         String::new()
     };
     
+    // Build health check section based on type
+    let health_check_type = config_overrides.health_check_type.as_deref().unwrap_or("process");
+    let health_check_interval = config_overrides.health_check_interval_ms.unwrap_or(1000);
+    let health_check_timeout = config_overrides.health_check_timeout_ms.unwrap_or(500);
+    let health_check_retries = config_overrides.health_check_failure_threshold.unwrap_or(3);
+    
+    let health_check_section = if health_check_type == "http" {
+        let endpoint = config_overrides.health_check_endpoint
+            .as_deref()
+            .unwrap_or("http://localhost:8080/health");
+        format!(r#"
+        health_check:
+          type: "http"
+          http_endpoint: "{}"
+          run_options:
+            enabled: true
+            interval: {}ms
+            timeout: {}ms
+            initial_delay: 0s
+            retries: {}"#, endpoint, health_check_interval, health_check_timeout, health_check_retries)
+    } else {
+        format!(r#"
+        health_check:
+          type: "process"
+          run_options:
+            enabled: true
+            interval: {}ms
+            timeout: {}ms
+            initial_delay: 0s
+            retries: {}"#, health_check_interval, health_check_timeout, health_check_retries)
+    };
+    
     let config_content = format!(r#"
 process_manager:
   port: {}
@@ -272,16 +304,8 @@ managed_processes:
             default:
               max_retries: 5
               retry_delay: 1s
-              backoff_rate: 1.0{}
-        health_check:
-          type: "process"
-          run_options:
-            enabled: true
-            interval: 1s
-            timeout: 500ms
-            initial_delay: 0s
-            retries: 3
-"#, config_overrides.port, process_id, testexe_str, args, graceful_timeout, resource_limits);
+              backoff_rate: 1.0{}{}
+"#, config_overrides.port, process_id, testexe_str, args, graceful_timeout, resource_limits, health_check_section);
     
     fs::write(&config_path, config_content)
         .map_err(|e| format!("Failed to write config file: {}", e))?;
@@ -299,6 +323,12 @@ pub struct TestConfigOptions {
     pub log_dir: Option<PathBuf>,
     pub memory_limit_mb: Option<u64>,
     pub memory_policy: Option<String>,
+    // HTTP health check options
+    pub health_check_type: Option<String>,  // "process" or "http"
+    pub health_check_endpoint: Option<String>,  // For HTTP health checks
+    pub health_check_interval_ms: Option<u64>,
+    pub health_check_timeout_ms: Option<u64>,
+    pub health_check_failure_threshold: Option<u32>,
 }
 
 impl Default for TestConfigOptions {
@@ -311,6 +341,11 @@ impl Default for TestConfigOptions {
             log_dir: None,
             memory_limit_mb: None,
             memory_policy: None,
+            health_check_type: None,
+            health_check_endpoint: None,
+            health_check_interval_ms: None,
+            health_check_timeout_ms: None,
+            health_check_failure_threshold: None,
         }
     }
 }

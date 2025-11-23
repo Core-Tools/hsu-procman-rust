@@ -57,7 +57,7 @@ hsu-procman-rust/
 │   ├── hsu-common/         # Shared types and errors
 │   ├── hsu-process/        # Low-level process operations
 │   ├── hsu-process-state/  # State machine
-│   ├── hsu-process-file/   # PID file persistence
+│   ├── hsu-process-file/   # PID files & log path generation
 │   ├── hsu-monitoring/     # Health checks
 │   ├── hsu-resource-limits/# Resource monitoring
 │   ├── hsu-log-collection/ # Log aggregation

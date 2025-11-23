@@ -284,28 +284,71 @@ fn setup_windows_signal_handler(shutdown: Arc<AtomicBool>) -> Result<(), Box<dyn
 }
 
 async fn run_health_server(port: u16, fail_after: Option<u64>) {
+    use hyper::server::conn::http1;
+    use hyper::service::service_fn;
+    use hyper::{Request, Response, StatusCode};
+    use hyper::body::Bytes;
+    use hyper_util::rt::TokioIo;
+    use http_body_util::{Full, BodyExt};
+    use tokio::net::TcpListener;
+    
     let start_time = std::time::Instant::now();
     let addr = format!("127.0.0.1:{}", port);
     
-    info!("Health check server listening on http://{}", addr);
+    info!("Health check server starting on http://{}", addr);
     
-    // Simple HTTP server without hyper dependency
-    // For now, just log that we would start it
-    // In Phase 2, we'll implement this with a simple TCP server
-    warn!("Health check server not fully implemented yet - would listen on {}", addr);
-    
-    // Keep alive and simulate health status
-    loop {
-        let elapsed = start_time.elapsed().as_secs();
-        let should_fail = fail_after.map_or(false, |secs| elapsed >= secs);
-        
-        if should_fail {
-            debug!("Health check would return: 503 Unhealthy");
-        } else {
-            debug!("Health check would return: 200 OK");
+    let listener = match TcpListener::bind(&addr).await {
+        Ok(l) => {
+            info!("Health check server listening on http://{}", addr);
+            l
         }
+        Err(e) => {
+            error!("Failed to bind health server to {}: {}", addr, e);
+            return;
+        }
+    };
+    
+    loop {
+        let (stream, _) = match listener.accept().await {
+            Ok(conn) => conn,
+            Err(e) => {
+                warn!("Failed to accept connection: {}", e);
+                continue;
+            }
+        };
         
-        sleep(Duration::from_secs(5)).await;
+        let io = TokioIo::new(stream);
+        let fail_after = fail_after;
+        let start_time = start_time;
+        
+        tokio::spawn(async move {
+            let service = service_fn(move |_req: Request<hyper::body::Incoming>| {
+                let elapsed = start_time.elapsed().as_secs();
+                let should_fail = fail_after.map_or(false, |secs| elapsed >= secs);
+                
+                async move {
+                    if should_fail {
+                        debug!("Health check returning: 503 Unhealthy");
+                        let body = Full::new(Bytes::from("Unhealthy\n")).boxed();
+                        Ok::<_, hyper::Error>(Response::builder()
+                            .status(StatusCode::SERVICE_UNAVAILABLE)
+                            .body(body)
+                            .unwrap())
+                    } else {
+                        debug!("Health check returning: 200 OK");
+                        let body = Full::new(Bytes::from("OK\n")).boxed();
+                        Ok::<_, hyper::Error>(Response::builder()
+                            .status(StatusCode::OK)
+                            .body(body)
+                            .unwrap())
+                    }
+                }
+            });
+            
+            if let Err(e) = http1::Builder::new().serve_connection(io, service).await {
+                error!("Error serving health check connection: {}", e);
+            }
+        });
     }
 }
 

@@ -393,6 +393,140 @@ impl ProcessFileManager {
             
         Ok(port)
     }
+    
+    // ===== LOG DIRECTORY METHODS =====
+    
+    /// Get the base directory for log files (platform-specific)
+    fn get_log_base_directory(&self) -> PathBuf {
+        if let Some(ref base_dir) = self.config.base_directory {
+            return PathBuf::from(base_dir).join("logs");
+        }
+        
+        // Use OS-appropriate defaults based on service context
+        match self.config.service_context {
+            ServiceContext::System => self.get_system_log_directory(),
+            ServiceContext::User => self.get_user_log_directory(),
+            ServiceContext::Session => self.get_session_log_directory(),
+        }
+    }
+    
+    /// Get system service log directory (platform-specific)
+    fn get_system_log_directory(&self) -> PathBuf {
+        #[cfg(target_os = "windows")]
+        {
+            // Windows: C:\ProgramData\ (consistent with PID files)
+            PathBuf::from(std::env::var("ProgramData")
+                .unwrap_or_else(|_| "C:\\ProgramData".to_string()))
+        }
+        
+        #[cfg(target_os = "macos")]
+        {
+            // macOS: /Library/Logs/
+            PathBuf::from("/Library/Logs")
+        }
+        
+        #[cfg(all(not(target_os = "windows"), not(target_os = "macos")))]
+        {
+            // Linux: /var/log/
+            PathBuf::from("/var/log")
+        }
+    }
+    
+    /// Get user service log directory (platform-specific)
+    fn get_user_log_directory(&self) -> PathBuf {
+        #[cfg(target_os = "windows")]
+        {
+            // Windows: %LOCALAPPDATA%\
+            PathBuf::from(std::env::var("LOCALAPPDATA")
+                .unwrap_or_else(|_| {
+                    let user_profile = std::env::var("USERPROFILE")
+                        .unwrap_or_else(|_| "C:\\Users\\Default".to_string());
+                    format!("{}\\AppData\\Local", user_profile)
+                }))
+        }
+        
+        #[cfg(target_os = "macos")]
+        {
+            // macOS: ~/Library/Logs/
+            dirs::home_dir()
+                .unwrap_or_else(|| PathBuf::from("/tmp"))
+                .join("Library/Logs")
+        }
+        
+        #[cfg(all(not(target_os = "windows"), not(target_os = "macos")))]
+        {
+            // Linux: ~/.local/share/hsu/ or $XDG_DATA_HOME/hsu/
+            dirs::data_local_dir()
+                .unwrap_or_else(|| {
+                    dirs::home_dir()
+                        .unwrap_or_else(|| PathBuf::from("/tmp"))
+                        .join(".local/share")
+                })
+                .join("hsu")
+        }
+    }
+    
+    /// Get session service log directory (same as user for now)
+    fn get_session_log_directory(&self) -> PathBuf {
+        #[cfg(target_os = "windows")]
+        {
+            // Windows: %TEMP%\logs
+            PathBuf::from(std::env::temp_dir()).join("logs")
+        }
+        
+        #[cfg(not(target_os = "windows"))]
+        {
+            // Unix: /tmp/logs
+            PathBuf::from("/tmp/logs")
+        }
+    }
+    
+    /// Generate the appropriate log directory path for the application
+    /// 
+    /// Example: `C:\ProgramData\hsu-process-manager\logs` (Windows, system service)
+    pub fn generate_log_directory_path(&self) -> PathBuf {
+        let mut base_dir = self.get_log_base_directory();
+        
+        // Create app subdirectory if requested
+        // For consistency with PID files: C:\ProgramData\hsu-process-manager\logs
+        if self.config.use_subdirectory {
+            base_dir = base_dir.join(&self.config.app_name);
+        }
+        
+        // For direct log directory without app subdirectory
+        base_dir.join("logs")
+    }
+    
+    /// Generate the log directory path for process-specific logs
+    /// 
+    /// Example: `C:\ProgramData\hsu-process-manager\logs\managed_processes`
+    pub fn generate_process_log_directory_path(&self) -> PathBuf {
+        self.generate_log_directory_path().join("managed_processes")
+    }
+    
+    /// Generate a complete log file path from a relative template
+    /// 
+    /// Example: `generate_log_file_path("manager.log")` → 
+    /// `C:\ProgramData\hsu-process-manager\logs\manager.log`
+    pub fn generate_log_file_path(&self, relative_template: &str) -> PathBuf {
+        let log_dir = self.generate_log_directory_path();
+        log_dir.join(relative_template)
+    }
+    
+    /// Generate a process-specific log file path from a relative template
+    /// 
+    /// The template can contain `{process_id}` placeholder which will be replaced.
+    /// 
+    /// Example: `generate_process_log_file_path("{process_id}_stdout.log", "my-service")` →
+    /// `C:\ProgramData\hsu-process-manager\logs\managed_processes\my-service_stdout.log`
+    pub fn generate_process_log_file_path(&self, relative_template: &str, process_id: &str) -> PathBuf {
+        let process_log_dir = self.generate_process_log_directory_path();
+        
+        // Replace {process_id} placeholder in template
+        let resolved_template = relative_template.replace("{process_id}", process_id);
+        
+        process_log_dir.join(resolved_template)
+    }
 }
 
 /// Compute a configuration hash for process identity validation

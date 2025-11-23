@@ -768,19 +768,28 @@ impl ProcessControlImpl {
                 (Duration::from_secs(10), Duration::from_secs(5), 3)
             };
             
-            info!("Starting health monitor for {} (type: {})", process_id, health_config.health_check_type);
+            let check_type = match health_config.health_check_type.as_str() {
+                "process" => HealthCheckType::Process,
+                "http" => HealthCheckType::Http,
+                _ => HealthCheckType::Process,
+            };
+            
+            info!("Starting health monitor for {} (type: {:?})", process_id, check_type);
+            if check_type == HealthCheckType::Http {
+                if let Some(ref endpoint) = health_config.http_endpoint {
+                    info!("HTTP health check endpoint: {}", endpoint);
+                } else {
+                    warn!("HTTP health check type specified but no endpoint configured for {}", process_id);
+                }
+            }
             
             HealthCheckConfig {
-                check_type: match health_config.health_check_type.as_str() {
-                    "process" => HealthCheckType::Process,
-                    "http" => HealthCheckType::Http,
-                    _ => HealthCheckType::Process,
-                },
+                check_type,
                 interval,
                 timeout,
                 failure_threshold: retries,
                 recovery_threshold: 2, // Default recovery threshold
-                http_endpoint: None, // TODO: Add http_endpoint to config
+                http_endpoint: health_config.http_endpoint.clone(),
             }
         } else {
             // No health check configured - create default process-based health check

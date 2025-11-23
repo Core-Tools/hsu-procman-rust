@@ -401,6 +401,9 @@ pub struct HealthCheckConfig {
     pub health_check_type: String, // "process", "http", "grpc", "tcp"
     
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub http_endpoint: Option<String>,  // HTTP endpoint for health checks (e.g., "http://localhost:8080/health")
+    
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub run_options: Option<HealthCheckRunOptions>,
 }
 

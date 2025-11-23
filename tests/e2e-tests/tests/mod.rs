@@ -3,10 +3,11 @@
 // Phase 1: Basic Lifecycle Management
 mod test_graceful_stop;
 mod test_forced_stop;
-// mod test_log_collection; // Coming next
+mod test_log_collection;
 
 // Phase 2: Health Monitoring & Restart
 mod test_health_restart;
+mod test_http_health;
 
 // Phase 3: Resource Limits
 mod test_memory_limit;
