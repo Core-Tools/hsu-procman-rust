@@ -1,0 +1,59 @@
+[package]
+name = "hsu-process-management"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+# Async runtime
+tokio = { workspace = true }
+
+# HTTP server
+axum = { workspace = true }
+tower = { workspace = true }
+
+# gRPC
+tonic = { workspace = true }
+prost = { workspace = true }
+
+# Serialization
+serde = { workspace = true }
+serde_json = { workspace = true }
+serde_yaml = "0.9"
+
+# Error handling
+thiserror = { workspace = true }
+anyhow = { workspace = true }
+
+# Date/time
+chrono = { workspace = true }
+
+# Logging
+tracing = { workspace = true }
+
+# Utilities
+uuid = { workspace = true }
+dashmap = { workspace = true }
+
+# Async traits
+async-trait = { workspace = true }
+
+# Internal dependencies - common & module communication
+hsu-common = { path = "../hsu-common" }
+
+# Internal dependencies - process management
+hsu-process-state = { path = "../hsu-process-state" }
+hsu-process = { path = "../hsu-process" }
+hsu-process-file = { path = "../hsu-process-file" }
+hsu-resource-limits = { path = "../hsu-resource-limits" }
+hsu-monitoring = { path = "../hsu-monitoring" }
+hsu-log-collection = { path = "../hsu-log-collection" }
+hsu-managed-process = { path = "../hsu-managed-process" }
+
+[target.'cfg(unix)'.dependencies]
+nix = { version = "0.27", features = ["signal"] }
+
+[dev-dependencies]
+tempfile = "3.8"
+

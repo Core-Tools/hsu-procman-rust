@@ -1,0 +1,30 @@
+[package]
+name = "hsu-module-api"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "Module API layer for HSU framework (gateway factory, registry client)"
+
+[lib]
+doctest = false
+
+[dependencies]
+hsu-common = { path = "../hsu-common" }
+hsu-module-management = { path = "../hsu-module-management" }
+hsu-module-proto = { path = "../hsu-module-proto" }
+
+tokio = { workspace = true }
+async-trait = { workspace = true }
+tracing = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+hyper = { workspace = true, features = ["client", "http1"] }
+hyper-util = { workspace = true, features = ["client-legacy", "http1"] }
+http-body-util = { workspace = true }
+tonic = { workspace = true }
+lazy_static = "1.5"
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["test-util"] }
+

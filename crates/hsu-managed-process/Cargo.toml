@@ -1,0 +1,33 @@
+[package]
+name = "hsu-managed-process"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+# Async runtime
+tokio = { workspace = true }
+
+# Serialization
+serde = { workspace = true }
+
+# Error handling
+thiserror = { workspace = true }
+anyhow = { workspace = true }
+
+# Date/time
+chrono = { workspace = true }
+
+# Logging
+tracing = { workspace = true }
+
+# Async traits
+async-trait = { workspace = true }
+
+# Internal dependencies
+hsu-common = { path = "../hsu-common" }
+hsu-process-state = { path = "../hsu-process-state" }
+hsu-process = { path = "../hsu-process" }
+hsu-log-collection = { path = "../hsu-log-collection" }
+

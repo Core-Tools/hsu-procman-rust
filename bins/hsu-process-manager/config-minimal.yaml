@@ -1,0 +1,22 @@
+# Minimal HSU Process Manager Configuration
+# This is the simplest possible config for testing
+
+process_manager:
+  port: 50055
+  log_level: "debug"
+  force_shutdown_timeout: 30s
+
+managed_processes:
+  - id: "test-process"
+    enabled: true
+    profile_type: "test"
+    type: "standard_managed"
+    management:
+      standard_managed:
+        control:
+          execution:
+            executable_path: "C:\\Windows\\System32\\cmd.exe"
+            args: ["/c", "echo", "Hello from test process"]
+            wait_delay: 100ms
+          graceful_timeout: 5s
+

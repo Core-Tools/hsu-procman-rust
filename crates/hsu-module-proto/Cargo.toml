@@ -1,0 +1,25 @@
+[package]
+name = "hsu-module-proto"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "Protocol abstraction layer for HSU framework"
+
+[lib]
+doctest = false
+
+[dependencies]
+hsu-common = { path = "../hsu-common" }
+hsu-module-management = { path = "../hsu-module-management" }
+
+tokio = { workspace = true }
+tokio-stream = { version = "0.1", features = ["net"] }
+async-trait = { workspace = true }
+tracing = { workspace = true }
+tonic = { workspace = true }
+prost = { workspace = true }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["test-util"] }
+

@@ -1,0 +1,16 @@
+[package]
+name = "hsu-common"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "Common types and utilities for HSU framework"
+
+[dependencies]
+thiserror = { workspace = true }
+serde = { workspace = true }
+tracing = { workspace = true }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["test-util"] }
+

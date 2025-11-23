@@ -1,0 +1,119 @@
+# HSU Process Manager Configuration Example
+# This format matches the Go implementation exactly for cross-compatibility
+
+process_manager:
+  port: 50055
+  log_level: "info"
+  force_shutdown_timeout: "30s"
+
+managed_processes:
+  - id: "echo-test"
+    type: "standard_managed"
+    profile_type: "short_running_task"
+    enabled: true
+    management:
+      standard_managed:                          # Type-specific configuration
+        metadata:
+          name: "Echo Test Process"
+          description: "Simple echo command for testing"
+          version: "1.0.0"
+          tags: ["test", "example"]
+        control:
+          execution:                             # Execution sub-object (matches Go)
+            executable_path: "echo"              # Was: executable
+            args: ["Hello from HSU Rust!"]       # Was: arguments
+            working_directory: "."
+            environment:
+              RUST_LOG: "info"
+              HSU_PROCESS_ID: "echo-test"
+            wait_delay: "10s"                    # Was: startup_timeout
+          restart_policy: "on-failure"           # Simple policy string
+          context_aware_restart:                 # Go's context-aware restart
+            default:
+              max_retries: 3
+              retry_delay: "5s"
+              backoff_rate: 1.5
+          limits:                                # Resource limits with policies
+            memory:
+              max_rss: 134217728                 # 128MB in bytes (not MB!)
+              warning_threshold: 80
+              policy: "log"
+            cpu:
+              max_percent: 50.0
+              warning_threshold: 70
+              policy: "log"
+          graceful_timeout: "10s"
+        health_check:
+          type: "process"                        # Health check type
+          run_options:                           # Nested run options
+            enabled: false
+            interval: "30s"
+            timeout: "5s"
+            initial_delay: "2s"
+            retries: 2
+
+  - id: "long-running-service"
+    type: "standard_managed"
+    profile_type: "web"
+    enabled: false  # Disabled by default
+    management:
+      standard_managed:
+        metadata:
+          name: "Long Running Service"
+        control:
+          execution:
+            executable_path: "sleep"
+            args: ["300"]
+            wait_delay: "10s"
+          restart_policy: "always"
+          context_aware_restart:
+            default:
+              max_retries: 5
+              retry_delay: "10s"
+              backoff_rate: 2.0
+            health_failures:
+              max_retries: 5
+              retry_delay: "10s"
+              backoff_rate: 2.0
+            resource_violations:
+              max_retries: 2
+              retry_delay: "30s"
+              backoff_rate: 1.2
+            startup_grace_period: "2m"
+            sustained_violation_time: "5m"
+          limits:
+            memory:
+              max_rss: 268435456                 # 256MB in bytes
+              policy: "restart"
+            cpu:
+              max_percent: 25.0
+              policy: "log"
+          graceful_timeout: "10s"
+        health_check:
+          type: "process"
+          run_options:
+            enabled: true
+            interval: "30s"
+            timeout: "5s"
+            initial_delay: "2s"
+            retries: 3
+
+log_collection:
+  enabled: true
+  global_aggregation:
+    enabled: true
+    targets:
+      - type: "process_manager_stdout"
+        format: "enhanced_plain"
+        prefix: "[HSU-RUST]"
+      - type: "file"
+        path: "hsu-process-manager.log"
+        format: "json"
+  enhancement:
+    enabled: true
+    metadata:
+      add_process_manager_id: true
+      add_hostname: true
+      add_timestamp: true
+      add_sequence: true
+      add_line_number: false

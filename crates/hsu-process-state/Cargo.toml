@@ -1,0 +1,20 @@
+[package]
+name = "hsu-process-state"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+# Serialization
+serde = { workspace = true }
+
+# Date/time
+chrono = { workspace = true }
+
+# Logging
+tracing = { workspace = true }
+
+# Internal dependencies
+hsu-common = { path = "../hsu-common" }
+

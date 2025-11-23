@@ -1,0 +1,31 @@
+[package]
+name = "hsu-process-manager"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "hsu-process-manager"
+path = "src/main.rs"
+
+[dependencies]
+# Async runtime
+tokio = { workspace = true }
+
+# CLI
+clap = { version = "4.4", features = ["derive"] }
+
+# Logging
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+
+# Error handling
+anyhow = { workspace = true }
+
+# Internal dependencies
+hsu-process-management = { path = "../../crates/hsu-process-management" }
+
+[target.'cfg(unix)'.dependencies]
+tokio = { workspace = true, features = ["signal"] }
+

@@ -1,0 +1,32 @@
+[package]
+name = "hsu-process-file"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+# Async runtime
+tokio = { workspace = true }
+
+# Serialization
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+# Error handling
+thiserror = { workspace = true }
+anyhow = { workspace = true }
+
+# Date/time
+chrono = { workspace = true }
+
+# Logging
+tracing = { workspace = true }
+
+# Platform-specific directories
+dirs = "5.0"
+
+# Internal dependencies
+hsu-common = { path = "../hsu-common" }
+hsu-process-state = { path = "../hsu-process-state" }
+

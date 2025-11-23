@@ -1,0 +1,48 @@
+[package]
+name = "hsu-monitoring"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+# Async runtime
+tokio = { workspace = true }
+
+# HTTP client
+hyper = { workspace = true }
+hyper-util = { workspace = true }
+http-body-util = { workspace = true }
+
+# gRPC
+tonic = { workspace = true }
+
+# Serialization
+serde = { workspace = true }
+
+# Error handling
+thiserror = { workspace = true }
+anyhow = { workspace = true }
+
+# Date/time
+chrono = { workspace = true }
+
+# Logging
+tracing = { workspace = true }
+
+# Async traits
+async-trait = { workspace = true }
+
+# Internal dependencies
+hsu-common = { path = "../hsu-common" }
+hsu-process-state = { path = "../hsu-process-state" }
+
+[target.'cfg(unix)'.dependencies]
+nix = { version = "0.27", features = ["signal"] }
+
+[target.'cfg(windows)'.dependencies]
+winapi = { version = "0.3", features = ["processthreadsapi", "winnt", "handleapi"] }
+
+# [build-dependencies]
+# tonic-build = "0.11"  # TODO: Re-enable when gRPC is fixed
+

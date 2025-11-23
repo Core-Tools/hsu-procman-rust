@@ -1,0 +1,31 @@
+[package]
+name = "hsu-resource-limits"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+# Async runtime
+tokio = { workspace = true }
+
+# Serialization
+serde = { workspace = true }
+
+# Error handling
+thiserror = { workspace = true }
+anyhow = { workspace = true }
+
+# Logging
+tracing = { workspace = true }
+
+# Date/time
+chrono = { workspace = true }
+
+# System information
+sysinfo = "0.30"
+
+# Internal dependencies
+hsu-common = { path = "../hsu-common" }
+hsu-process = { path = "../hsu-process" }
+

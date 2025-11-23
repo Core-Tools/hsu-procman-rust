@@ -1,0 +1,143 @@
+# HSU Process Manager Configuration - Go Compatible Format
+# This config file should work with BOTH Go and Rust implementations
+
+process_manager:
+  port: 50055
+  log_level: "info"
+  force_shutdown_timeout: "30s"
+
+log_collection:
+  enabled: true
+  global_aggregation:
+    enabled: true
+    targets:
+      - type: "process_manager_stdout"
+        format: "enhanced_plain"
+        prefix: "[AGGREGATED]"
+      - type: "file"
+        path: "process_manager-aggregated.log"
+        format: "enhanced_plain"
+  enhancement:
+    enabled: true
+    metadata:
+      add_process_manager_id: true
+      add_hostname: true
+      add_timestamp: true
+      add_sequence: true
+      add_line_number: true
+  default:
+    enabled: true
+    capture_stdout: true
+    capture_stderr: true
+    outputs:
+      separate:
+        stdout:
+          - type: "file"
+            path: "{process_id}-stdout.log"
+            format: "enhanced_plain"
+        stderr:
+          - type: "file"
+            path: "{process_id}-stderr.log"
+            format: "enhanced_plain"
+          - type: "process_manager_stdout"
+            format: "enhanced_plain"
+            prefix: "[ERROR]"
+
+managed_processes:
+  - id: "test-process-1"
+    type: "standard_managed"
+    profile_type: "web"
+    enabled: true
+    management:
+      standard_managed:
+        metadata:
+          name: "Test Process 1"
+          description: "Example process matching Go format"
+          version: "1.0.0"
+          tags: ["test", "example", "go-compatible"]
+        control:
+          execution:
+            executable_path: "echo"
+            args: ["Process", "1", "running"]
+            working_directory: "."
+            environment:
+              PROCESS_NAME: "test-process-1"
+              LOG_LEVEL: "info"
+            wait_delay: "10s"
+          restart_policy: "on-failure"
+          context_aware_restart:
+            default:
+              max_retries: 3
+              retry_delay: "5s"
+              backoff_rate: 1.5
+            health_failures:
+              max_retries: 5
+              retry_delay: "10s"
+              backoff_rate: 2.0
+            resource_violations:
+              max_retries: 2
+              retry_delay: "30s"
+              backoff_rate: 1.2
+            startup_grace_period: "2m"
+            sustained_violation_time: "5m"
+          limits:
+            memory:
+              max_rss: 10485760                 # 10MB in bytes
+              warning_threshold: 80
+              policy: "restart"
+            cpu:
+              max_percent: 80.0
+              warning_threshold: 70
+              policy: "log"
+            process:
+              max_file_descriptors: 1024
+              policy: "alert"
+          graceful_timeout: "10s"
+          log_collection:
+            enabled: true
+            capture_stdout: true
+            capture_stderr: true
+            outputs:
+              separate:
+                stdout:
+                  - type: "file"
+                    path: "{process_id}-detailed.log"
+                    format: "enhanced_plain"
+        health_check:
+          type: "process"
+          run_options:
+            enabled: true
+            interval: "10s"
+            timeout: "5s"
+            initial_delay: "2s"
+            retries: 2
+
+  - id: "test-process-2"
+    type: "standard_managed"
+    profile_type: "batch"
+    enabled: false
+    management:
+      standard_managed:
+        metadata:
+          name: "Test Process 2"
+        control:
+          execution:
+            executable_path: "sleep"
+            args: ["60"]
+            wait_delay: "5s"
+          restart_policy: "never"
+          context_aware_restart:
+            default:
+              max_retries: 0
+              retry_delay: "0s"
+              backoff_rate: 1.0
+          graceful_timeout: "5s"
+        health_check:
+          type: "process"
+          run_options:
+            enabled: false
+            interval: "30s"
+            timeout: "5s"
+            initial_delay: "5s"
+            retries: 1
+

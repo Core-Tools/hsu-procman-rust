@@ -1,0 +1,83 @@
+[workspace]
+resolver = "2"
+
+members = [
+    # Common/shared crates
+    "crates/hsu-common",
+    
+    # Module communication crates
+    "crates/hsu-module-management",
+    "crates/hsu-module-api",
+    "crates/hsu-module-proto",
+    "crates/hsu-service-registry",
+    
+    # Process management crates (libraries)
+    "crates/hsu-process-state",
+    "crates/hsu-process",
+    "crates/hsu-process-file",
+    "crates/hsu-resource-limits",
+    "crates/hsu-monitoring",
+    "crates/hsu-log-collection",
+    "crates/hsu-managed-process",
+    "crates/hsu-process-management",
+    
+    # Process management binary
+    "bins/hsu-process-manager",
+    
+    # Test utilities
+    "test-utils/testexe",
+    "tests/e2e-tests",
+]
+
+# Workspace-wide dependencies (shared versions)
+[workspace.dependencies]
+# Async runtime
+tokio = { version = "1.35", features = ["full"] }
+tokio-util = "0.7"
+
+# HTTP server/client
+axum = "0.7"
+hyper = "1.1"
+hyper-util = { version = "0.1", features = ["tokio", "client", "client-legacy", "http1", "http2"] }
+http-body-util = "0.1"
+tower = "0.4"
+
+# gRPC
+tonic = "0.11"
+prost = "0.12"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Error handling
+thiserror = "1.0"
+anyhow = "1.0"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Async traits
+async-trait = "0.1"
+
+# Utilities
+uuid = { version = "1.6", features = ["v4", "serde"] }
+dashmap = "5.5"
+chrono = { version = "0.4", features = ["serde"] }
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["HSU Core Team"]
+license = "Apache-2.0"
+
+# Profile settings
+[profile.dev]
+opt-level = 0
+debug = true
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
