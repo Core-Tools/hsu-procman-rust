@@ -79,6 +79,12 @@ impl OutputWriter for FileOutputWriter {
                 reason: format!("Failed to write to log file: {}", e),
             })?;
 
+        // Flush immediately to ensure data is written to disk
+        writer.flush().map_err(|e| hsu_common::ProcessError::LoggingError {
+            id: "log-service".to_string(),
+            reason: format!("Failed to flush log file: {}", e),
+        })?;
+
         Ok(())
     }
 

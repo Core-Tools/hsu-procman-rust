@@ -12,10 +12,11 @@ use crate::config::{ProcessConfig, ProcessManagerConfig};
 use crate::process_control_impl::ProcessControlImpl;
 use hsu_common::ProcessError;
 use hsu_process_state::ProcessState;
-use hsu_process_file::ProcessFileManager;
+use hsu_process_file::{ProcessFileManager, ServiceContext};
 use hsu_managed_process::{ProcessControl, ProcessControlConfig};
 use hsu_monitoring::HealthStatus;
 use hsu_resource_limits::ResourceUsage;
+use hsu_log_collection::LogCollectionService;
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::{Mutex, RwLock};
@@ -31,6 +32,7 @@ pub struct ProcessManager {
     processes: Arc<RwLock<HashMap<String, ManagedProcessInstance>>>,
     state: Arc<Mutex<ProcessManagerState>>,
     pid_file_manager: ProcessFileManager,
+    log_collection_service: Option<Arc<LogCollectionService>>,
 }
 
 /// Individual managed process instance with runtime state
@@ -91,11 +93,43 @@ impl ProcessManager {
     pub async fn new(config: ProcessManagerConfig) -> Result<Self> {
         info!("Creating process manager with {} processes", config.managed_processes.len());
         
+        // Create ProcessFileManager with optional base_directory override
+        let pid_file_manager = if let Some(ref base_dir) = config.process_manager.base_directory {
+            info!("Using base directory override for PID/log files: {}", base_dir);
+            ProcessFileManager::with_base_directory(base_dir, ServiceContext::Session, "hsu-procman")
+        } else {
+            ProcessFileManager::with_defaults()
+        };
+        
+        // Create log collection service if enabled
+        let log_collection_service = if let Some(ref log_config) = config.log_collection {
+            if log_config.enabled {
+                info!("Log collection enabled, initializing service...");
+                let service = Self::create_log_collection_service(
+                    log_config,
+                    &pid_file_manager,
+                )?;
+                
+                // Start the service
+                service.start().await
+                    .map_err(|e| ProcessError::spawn_failed("log-service", format!("Failed to start log collection service: {}", e)))?;
+                info!("Log collection service started successfully");
+                
+                Some(service)
+            } else {
+                info!("Log collection disabled in configuration");
+                None
+            }
+        } else {
+            None
+        };
+        
         let manager = Self {
             config,
             processes: Arc::new(RwLock::new(HashMap::new())),
             state: Arc::new(Mutex::new(ProcessManagerState::Initializing)),
-            pid_file_manager: ProcessFileManager::with_defaults(),
+            pid_file_manager,
+            log_collection_service,
         };
 
         // Initialize processes from configuration
@@ -145,14 +179,19 @@ impl ProcessManager {
                 can_restart: !matches!(process_config.process_type, crate::config::ProcessManagementType::Unmanaged),
                 graceful_timeout,
                 process_profile_type: process_config.profile_type.clone(),
-                log_collection_service: None,  // TODO: Add log collection service integration
-                log_config: None,               // TODO: Add log config from process config
+                log_collection_service: self.log_collection_service.clone(),
+                log_config: None,  // TODO: Add log config from process config (Phase 3)
             };
             
             let process_control = Box::new(ProcessControlImpl::new(
                 process_config.clone(),
                 control_config,
             ));
+            
+            // Register process for log collection if enabled
+            if let Some(ref log_service) = self.log_collection_service {
+                self.register_process_for_logging(&process_config.id, process_config, log_service);
+            }
             
             let managed_process = ManagedProcessInstance {
                 config: process_config.clone(),
@@ -446,6 +485,138 @@ impl ProcessManager {
         let state = self.state.lock().await;
         state.clone()
     }
+    
+    /// Create and configure log collection service
+    fn create_log_collection_service(
+        log_config: &crate::config::LogCollectionConfig,
+        pid_file_manager: &ProcessFileManager,
+    ) -> Result<Arc<LogCollectionService>> {
+        info!("Creating log collection service");
+        
+        // Create service with default config
+        let mut service_config = hsu_log_collection::SystemLogConfig::default();
+        
+        // Configure global aggregation if enabled
+        if let Some(ref global_agg) = log_config.global_aggregation {
+            if global_agg.enabled {
+                info!("Global aggregation enabled with {} targets", global_agg.targets.len());
+                
+                for target in &global_agg.targets {
+                    match target.target_type.as_str() {
+                        "file" => {
+                            if let Some(ref path) = target.path {
+                                let resolved_path = pid_file_manager.generate_log_file_path(path);
+                                info!("Global aggregation file target: {}", resolved_path.display());
+                                
+                                // Create parent directories
+                                if let Some(parent) = resolved_path.parent() {
+                                    std::fs::create_dir_all(parent)
+                                        .map_err(|e| ProcessError::spawn_failed("log-service", format!("Failed to create log directory: {}", e)))?;
+                                }
+                                
+                                // Configure file output in service config
+                                service_config.output_file = Some(resolved_path);
+                            }
+                        }
+                        "process_manager_stdout" => {
+                            info!("Global aggregation stdout target (forwarding to PROCMAN stdout)");
+                            // Stdout forwarding is handled by default
+                        }
+                        _ => {
+                            warn!("Unknown log target type: {}", target.target_type);
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Create service
+        let service = Arc::new(LogCollectionService::new(service_config));
+        info!("Log collection service created successfully");
+        
+        Ok(service)
+    }
+    
+    /// Register a process with the log collection service
+    fn register_process_for_logging(
+        &self,
+        process_id: &str,
+        process_config: &ProcessConfig,
+        log_service: &Arc<LogCollectionService>,
+    ) {
+        // Get the effective log collection config for this process
+        let log_config = self.get_process_log_config(process_config);
+        
+        if !log_config.enabled {
+            debug!("Log collection disabled for process: {}", process_id);
+            return;
+        }
+        
+        info!("Registering process {} for log collection", process_id);
+        
+        // Register process with the service
+        let process_log_config = hsu_log_collection::ProcessLogConfig {
+            enabled: log_config.enabled,
+            capture_stdout: log_config.capture_stdout,
+            capture_stderr: log_config.capture_stderr,
+        };
+        
+        if let Err(e) = log_service.register_process(process_id.to_string(), process_log_config) {
+            warn!("Failed to register process {} for logging: {}", process_id, e);
+            return;
+        }
+        
+        debug!("Process {} successfully registered for log collection", process_id);
+        
+        // Note: Per-process file outputs are managed by the global service configuration
+        // The service will write all logs to the configured global output file
+        // TODO: Add per-process file output support to hsu-log-collection service
+    }
+    
+    /// Get the effective log collection configuration for a process
+    /// This merges per-process override with default config
+    fn get_process_log_config(&self, process_config: &ProcessConfig) -> crate::config::ProcessLogCollectionConfig {
+        // Try to get per-process override
+        let process_override = match &process_config.process_type {
+            crate::config::ProcessManagementType::StandardManaged => {
+                process_config.management.standard_managed.as_ref()
+                    .and_then(|sm| sm.control.log_collection.as_ref())
+            }
+            crate::config::ProcessManagementType::IntegratedManaged => {
+                process_config.management.integrated_managed.as_ref()
+                    .and_then(|im| im.control.log_collection.as_ref())
+            }
+            _ => None,
+        };
+        
+        // If there's a per-process override, use it
+        if let Some(override_config) = process_override {
+            return override_config.clone();
+        }
+        
+        // Otherwise, use default from global log_collection config
+        if let Some(ref log_config) = self.config.log_collection {
+            if let Some(ref default_config) = log_config.default {
+                return crate::config::ProcessLogCollectionConfig {
+                    enabled: default_config.enabled,
+                    capture_stdout: default_config.capture_stdout,
+                    capture_stderr: default_config.capture_stderr,
+                    processing: None,
+                    outputs: default_config.outputs.clone(),
+                };
+            }
+        }
+        
+        // Fall back to default values
+        crate::config::ProcessLogCollectionConfig {
+            enabled: true,
+            capture_stdout: true,
+            capture_stderr: true,
+            processing: None,
+            outputs: None,
+        }
+    }
+    
 }
 
 // Re-export for compatibility
@@ -466,6 +637,7 @@ mod tests {
                 port: 50055,
                 log_level: "info".to_string(),
                 force_shutdown_timeout: Duration::from_secs(30),
+                base_directory: None,
             },
             managed_processes: vec![
                 ProcessConfig {

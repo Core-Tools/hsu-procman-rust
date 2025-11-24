@@ -116,7 +116,18 @@ async fn setup_signal_handlers() {
 
     #[cfg(windows)]
     {
-        let _ = signal::ctrl_c().await;
-        info!("Received Ctrl+C signal");
+        // On Windows, handle both Ctrl+C and Ctrl+Break
+        // Note: taskkill sends console control events which should be caught here
+        let mut ctrl_break = signal::windows::ctrl_break()
+            .expect("Failed to create Ctrl+Break handler");
+        
+        tokio::select! {
+            _ = signal::ctrl_c() => {
+                info!("Received Ctrl+C or console close signal");
+            }
+            _ = ctrl_break.recv() => {
+                info!("Received Ctrl+Break signal");
+            }
+        }
     }
 }

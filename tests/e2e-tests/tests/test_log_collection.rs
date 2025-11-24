@@ -75,7 +75,6 @@ use e2e_tests::process_manager::TestConfigOptions;
 use e2e_tests::assertions::assert_process_started;
 use std::time::Duration;
 use std::thread;
-use std::path::PathBuf;
 
 #[test]
 fn test_log_collection() {
@@ -85,18 +84,14 @@ fn test_log_collection() {
     
     let executor = TestExecutor::new("log-collection");
     
-    // Create a test log directory
-    let test_dir = PathBuf::from("target/tmp/e2e-test-log-collection");
-    std::fs::create_dir_all(&test_dir).expect("Failed to create test log directory");
-    let log_dir = test_dir.join("logs");
-    
     let config = TestConfigOptions {
         port: 50061,
         // TESTEXE that produces output on stdout
         testexe_args: vec!["--run-duration".to_string(), "5".to_string()],
         graceful_timeout_ms: 5000,
         enable_logging: true,  // Enable log collection
-        log_dir: Some(log_dir.clone()),
+        // Use the test executor's run directory as the base directory for log files
+        log_dir: Some(executor.test_dir.clone()),
         ..Default::default()
     };
     
@@ -130,8 +125,11 @@ fn test_log_collection() {
         // Step 3: Check if log files were created (if log collection is enabled)
         println!("Step 3: Checking for log files...");
         
-        if log_dir.exists() {
-            let entries: Vec<_> = std::fs::read_dir(&log_dir)
+        // The log files should be in {test_dir}/logs/
+        let expected_log_dir = procman.test_dir.join("logs");
+        
+        if expected_log_dir.exists() {
+            let entries: Vec<_> = std::fs::read_dir(&expected_log_dir)
                 .map(|dir| dir.filter_map(|e| e.ok()).collect())
                 .unwrap_or_default();
             
@@ -144,18 +142,21 @@ fn test_log_collection() {
             if !entries.is_empty() {
                 println!("✓ Log files found\n");
                 
-                // Try to read one log file
-                if let Some(entry) = entries.first() {
-                    if let Ok(content) = std::fs::read_to_string(entry.path()) {
+                // Look for the aggregated log file
+                let aggregated_log = expected_log_dir.join("process_manager-aggregated.log");
+                if aggregated_log.exists() {
+                    if let Ok(content) = std::fs::read_to_string(&aggregated_log) {
                         let line_count = content.lines().count();
-                        println!("Log file {} contains {} lines", 
-                                 entry.file_name().to_string_lossy(), 
-                                 line_count);
+                        println!("Aggregated log file contains {} lines", line_count);
                         
                         // Show first few lines
-                        println!("First few lines:");
-                        for line in content.lines().take(5) {
-                            println!("  {}", line);
+                        if line_count > 0 {
+                            println!("First few log entries:");
+                            for line in content.lines().take(5) {
+                                println!("  {}", line);
+                            }
+                        } else {
+                            println!("⚠ Aggregated log file is empty");
                         }
                     }
                 }
@@ -164,22 +165,13 @@ fn test_log_collection() {
                 println!("  (This is expected as log collection integration is pending)");
             }
         } else {
-            println!("ℹ Log directory not created: {}", log_dir.display());
+            println!("ℹ Log directory not created: {}", expected_log_dir.display());
             println!("  (This is expected as log collection integration is pending)");
         }
         
         // Step 4: Graceful shutdown
         println!("\nStep 4: Graceful shutdown...");
         thread::sleep(Duration::from_secs(2));
-        
-        // Note: This test currently validates that:
-        // 1. Process starts and runs
-        // 2. Process produces output (visible in procman logs)
-        // 3. Log directory creation is attempted
-        // 4. Test framework works correctly
-        // 
-        // Full log collection will be completed when ProcessControlImpl is updated
-        // to wire stdout/stderr into the LogCollectionService
         
         Ok(())
     });
@@ -188,9 +180,7 @@ fn test_log_collection() {
         Ok(()) => {
             println!("\n========================================");
             println!("✓ TEST PASSED: Log Collection");
-            println!("========================================\n");
-            println!("Note: Full log collection integration pending.");
-            println!("This test validates the framework is ready.");
+            println!("========================================");
         }
         Err(e) => {
             println!("\n========================================");

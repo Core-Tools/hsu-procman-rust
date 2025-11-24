@@ -7,6 +7,10 @@ publish = false
 [dependencies]
 wait-timeout = "0.2"
 
+# For process termination with AttachConsole Dead PID Hack on Windows
+[target.'cfg(windows)'.dependencies]
+hsu-process = { path = "../../crates/hsu-process" }
+
 # For Unix signal handling in process management
 [target.'cfg(unix)'.dependencies]
 nix = { version = "0.27", features = ["signal", "process"] }

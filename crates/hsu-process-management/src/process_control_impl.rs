@@ -17,6 +17,7 @@ use hsu_managed_process::{
 use async_trait::async_trait;
 use hsu_common::{ProcessError as CommonProcessError, ProcessResult};
 use hsu_process_state::{ProcessState, ProcessStateMachine};
+use hsu_process;
 use crate::config::ProcessConfig;
 use crate::lifecycle::ProcessLifecycleManager;
 use hsu_monitoring::{HealthStatus, HealthMonitor, HealthCheckConfig, HealthCheckType};
@@ -252,6 +253,18 @@ impl ProcessControlImpl {
             .stderr(std::process::Stdio::piped())
             .stdin(std::process::Stdio::null());
         
+        // Windows-specific: Isolate child processes in a separate process group
+        // This mirrors Go's CREATE_NEW_PROCESS_GROUP behavior and prevents:
+        // 1. Console signals from propagating to/from parent processes
+        // 2. Spurious Ctrl+C events reaching the test runner
+        // 3. Signal interference during process restart cycles
+        #[cfg(windows)]
+        {
+            use std::os::windows::process::CommandExt;
+            const CREATE_NEW_PROCESS_GROUP: u32 = 0x00000200;
+            cmd.creation_flags(CREATE_NEW_PROCESS_GROUP);
+        }
+        
         // Spawn the process (spawn is synchronous, returns Result)
         match cmd.spawn() {
             Ok(mut child) => {
@@ -357,22 +370,18 @@ impl ProcessControlImpl {
         
         #[cfg(windows)]
         {
-            // On Windows, use taskkill for graceful shutdown
-            // Note: This sends a WM_CLOSE message which is more graceful than TerminateProcess
-            let output = std::process::Command::new("taskkill")
-                .args(&["/PID", &pid.to_string()])
-                .output();
-                
-            match output {
-                Ok(o) if o.status.success() => {
-                    info!("Sent termination signal to PID {}", pid);
-                }
-                Ok(o) => {
-                    warn!("taskkill returned non-zero status for PID {}: {}", 
-                          pid, String::from_utf8_lossy(&o.stderr));
+            // On Windows, use GenerateConsoleCtrlEvent to send Ctrl+Break signal
+            // This works correctly with CREATE_NEW_PROCESS_GROUP and allows graceful shutdown
+            // 
+            // Note: is_dead=false because we're terminating an alive process
+            // The AttachConsole hack will NOT be applied here (only for confirmed dead PIDs)
+            let timeout = std::time::Duration::from_secs(1);
+            match hsu_process::terminate_windows::send_termination_signal(pid, false, timeout) {
+                Ok(_) => {
+                    info!("Successfully sent Ctrl+Break signal to PID {}", pid);
                 }
                 Err(e) => {
-                    warn!("Failed to execute taskkill for PID {}: {}", pid, e);
+                    warn!("Failed to send Ctrl+Break to PID {}: {}", pid, e);
                 }
             }
         }
@@ -405,13 +414,18 @@ impl ProcessControlImpl {
                     
                     #[cfg(windows)]
                     {
-                        // Use /F flag for forced termination
+                        // Force terminate using TerminateProcess
+                        // Note: hsu_process::send_termination_signal already tried graceful, so we force it
                         if let Err(e) = std::process::Command::new("taskkill")
                             .args(&["/F", "/PID", &pid.to_string()])
                             .output()
                         {
                             error!("Failed to force kill PID {}: {}", pid, e);
                         }
+                        // Note: We do NOT apply the AttachConsole Dead PID Hack here because:
+                        // 1. It would send console signals to PROCMAN's parent (test runner)
+                        // 2. This causes spurious Ctrl+C events in the test harness
+                        // 3. The hack should ONLY be applied when PROCMAN itself exits (by the test runner)
                     }
                 }
             }
@@ -462,6 +476,24 @@ impl ProcessControlImpl {
                 }
                 Err(e) => {
                     error!("Failed to wait for process {} (PID: {}): {}", process_id, pid, e);
+                }
+            }
+            
+            // CRITICAL: Apply AttachConsole Dead PID Hack after child exits
+            // This is necessary for production use where there's no test runner
+            // to apply the hack. Even with CREATE_NEW_PROCESS_GROUP isolation,
+            // the hack should be applied to prevent console state corruption.
+            // Following Go's pattern: apply hack from PROCMAN after child is confirmed dead.
+            #[cfg(windows)]
+            {
+                // Wait a bit to ensure process is fully dead
+                tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+                if let Err(e) = hsu_process::terminate_windows::send_termination_signal(
+                    pid, 
+                    true,  // Process is dead - apply console reset hack
+                    std::time::Duration::from_millis(100)
+                ) {
+                    debug!("Console signal fix for PID {}: {}", pid, e);
                 }
             }
             
@@ -1055,16 +1087,16 @@ impl ProcessControl for ProcessControlImpl {
     async fn stop(&mut self) -> ProcessResult<()> {
         info!("Stopping process control: {}", self.config.id);
         
-        // Stop background tasks first
-        self.stop_background_tasks();
-        
         // Transition to stopping state
         if self.state_machine.can_stop() {
             let _ = self.state_machine.transition_to_stopping();
         }
         
-        // Terminate the process
+        // Terminate the process FIRST (this waits for exit_monitor_task to complete naturally)
         self.terminate_process().await?;
+        
+        // NOW stop remaining background tasks (exit_monitor already completed)
+        self.stop_background_tasks();
         
         // Transition to stopped
         let _ = self.state_machine.transition_to_stopped();

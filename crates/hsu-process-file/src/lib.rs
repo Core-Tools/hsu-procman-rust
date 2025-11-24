@@ -207,6 +207,26 @@ impl ProcessFileManager {
         Self::new(ProcessFileConfig::default())
     }
     
+    /// Create a ProcessFileManager with explicit base directory override
+    /// 
+    /// # Arguments
+    /// * `base_directory` - Base directory for PID and log files
+    /// * `service_context` - Service context (System, User, Session)
+    /// * `app_name` - Application name for subdirectory creation
+    pub fn with_base_directory(
+        base_directory: impl Into<String>,
+        service_context: ServiceContext,
+        app_name: impl Into<String>,
+    ) -> Self {
+        Self::new(ProcessFileConfig {
+            base_directory: Some(base_directory.into()),
+            service_context,
+            app_name: app_name.into(),
+            use_subdirectory: true,
+            ..Default::default()
+        })
+    }
+    
     /// Get the base directory for process files (platform-specific)
     pub fn get_base_directory(&self) -> PathBuf {
         if let Some(ref base_dir) = self.config.base_directory {
@@ -399,7 +419,9 @@ impl ProcessFileManager {
     /// Get the base directory for log files (platform-specific)
     fn get_log_base_directory(&self) -> PathBuf {
         if let Some(ref base_dir) = self.config.base_directory {
-            return PathBuf::from(base_dir).join("logs");
+            // When base_directory is explicitly set, use it as-is
+            // The caller is responsible for providing the complete base path
+            return PathBuf::from(base_dir);
         }
         
         // Use OS-appropriate defaults based on service context
@@ -487,13 +509,19 @@ impl ProcessFileManager {
     pub fn generate_log_directory_path(&self) -> PathBuf {
         let mut base_dir = self.get_log_base_directory();
         
+        // When base_directory is explicitly set, return it with a "logs" subdirectory
+        // to separate log files from PID files
+        if self.config.base_directory.is_some() {
+            return base_dir.join("logs");
+        }
+        
         // Create app subdirectory if requested
         // For consistency with PID files: C:\ProgramData\hsu-process-manager\logs
         if self.config.use_subdirectory {
             base_dir = base_dir.join(&self.config.app_name);
         }
         
-        // For direct log directory without app subdirectory
+        // Add logs subdirectory
         base_dir.join("logs")
     }
     

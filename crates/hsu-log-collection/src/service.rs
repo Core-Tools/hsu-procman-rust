@@ -366,6 +366,7 @@ impl ProcessLogCollector {
         service_refs: ServiceRefs,
         cancel_token: CancellationToken,
     ) {
+        debug!("stream_reader started for {} ({:?})", process_id, stream_type);
         let reader = BufReader::new(stream);
         let mut lines = reader.lines();
         let mut line_num = 0i64;

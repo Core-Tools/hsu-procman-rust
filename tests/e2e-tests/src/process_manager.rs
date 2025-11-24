@@ -53,6 +53,15 @@ impl ProcessManagerWrapper {
             .stdout(Stdio::from(log_file))
             .stderr(Stdio::from(log_file_clone));
 
+        // On Windows, create PROCMAN in its own process group to isolate console signals
+        // This prevents Ctrl+Break sent to PROCMAN from propagating to the test runner
+        #[cfg(windows)]
+        {
+            use std::os::windows::process::CommandExt;
+            const CREATE_NEW_PROCESS_GROUP: u32 = 0x00000200;
+            cmd.creation_flags(CREATE_NEW_PROCESS_GROUP);
+        }
+
         let child = cmd.spawn()
             .map_err(|e| format!("Failed to spawn PROCMAN: {}", e))?;
 
@@ -114,20 +123,29 @@ impl ProcessManagerWrapper {
     /// Send termination signal to PROCMAN
     pub fn shutdown(&mut self) -> Result<(), String> {
         if let Some(mut child) = self.process.take() {
-            println!("Sending termination signal to PROCMAN...");
+            let pid = child.id();
+            println!("Sending termination signal to PROCMAN (PID: {})...", pid);
             
             #[cfg(windows)]
             {
-                // On Windows, we need to send Ctrl+C
-                // For now, just kill it
-                child.kill().map_err(|e| format!("Failed to kill PROCMAN: {}", e))?;
+                // On Windows, use Ctrl+Break signal for graceful shutdown (same as PROCMAN does for children)
+                // This allows PROCMAN to clean up its child processes properly
+                let timeout = std::time::Duration::from_secs(5);
+                match hsu_process::terminate_windows::send_termination_signal(pid, false, timeout) {
+                    Ok(_) => {
+                        println!("Sent Ctrl+Break signal to PROCMAN");
+                    }
+                    Err(e) => {
+                        println!("Warning: Failed to send Ctrl+Break: {}", e);
+                    }
+                }
             }
             
             #[cfg(unix)]
             {
                 // On Unix, send SIGTERM
                 nix::sys::signal::kill(
-                    nix::unistd::Pid::from_raw(child.id() as i32),
+                    nix::unistd::Pid::from_raw(pid as i32),
                     nix::sys::signal::Signal::SIGTERM
                 ).map_err(|e| format!("Failed to send SIGTERM: {}", e))?;
             }
@@ -136,15 +154,54 @@ impl ProcessManagerWrapper {
             thread::sleep(Duration::from_millis(500));
             self.collect_final_logs(&mut child);
             
-            // Wait for process to exit
+            // Wait for process to exit gracefully
             match child.wait_timeout(Duration::from_secs(10)) {
                 Ok(Some(status)) => {
                     println!("PROCMAN exited with status: {}", status);
+                    
+                    #[cfg(windows)]
+                    {
+                        // CRITICAL: Apply AttachConsole Dead PID Hack to fix console signal handling
+                        // This prevents console state corruption that causes zombie processes in subsequent tests
+                        println!("Applying AttachConsole Dead PID Hack for console signal fix...");
+                        thread::sleep(Duration::from_millis(100)); // Ensure process is fully dead
+                        let _ = hsu_process::send_termination_signal(
+                            pid, 
+                            true,  // Process is dead
+                            Duration::from_millis(100)
+                        );
+                    }
+                    
                     Ok(())
                 }
                 Ok(None) => {
                     println!("PROCMAN did not exit in time, forcing kill");
-                    child.kill().map_err(|e| format!("Failed to force kill: {}", e))?;
+                    
+                    #[cfg(windows)]
+                    {
+                        // Force kill with /F flag
+                        let _ = std::process::Command::new("taskkill")
+                            .args(&["/F", "/PID", &pid.to_string()])
+                            .output();
+                        
+                        // CRITICAL: Apply AttachConsole Dead PID Hack after force kill
+                        thread::sleep(Duration::from_millis(200));
+                        let _ = hsu_process::send_termination_signal(
+                            pid, 
+                            true,  // Process is dead
+                            Duration::from_millis(100)
+                        );
+                    }
+                    
+                    #[cfg(unix)]
+                    {
+                        // Send SIGKILL
+                        let _ = nix::sys::signal::kill(
+                            nix::unistd::Pid::from_raw(pid as i32),
+                            nix::sys::signal::Signal::SIGKILL
+                        );
+                    }
+                    
                     child.wait().ok();
                     Ok(())
                 }
@@ -280,12 +337,60 @@ pub fn create_test_config(
             retries: {}"#, health_check_interval, health_check_timeout, health_check_retries)
     };
     
+    // Build base_directory section if log_dir is specified
+    let base_directory_section = if let Some(ref log_dir) = config_overrides.log_dir {
+        // Convert to absolute path to avoid issues with PROCMAN's working directory
+        let absolute_log_dir = if log_dir.is_absolute() {
+            log_dir.clone()
+        } else {
+            std::env::current_dir()
+                .unwrap_or_else(|_| PathBuf::from("."))
+                .join(log_dir)
+        };
+        let log_dir_str = absolute_log_dir.to_string_lossy().replace('\\', "\\\\");
+        format!(r#"
+  base_directory: "{}""#, log_dir_str)
+    } else {
+        String::new()
+    };
+    
+    // Build log_collection section if logging is enabled
+    let log_collection_section = if config_overrides.enable_logging {
+        format!(r#"
+
+log_collection:
+  enabled: true
+  global_aggregation:
+    enabled: true
+    targets:
+      - type: "file"
+        path: "process_manager-aggregated.log"
+        format: "plain"
+  default:
+    enabled: true
+    capture_stdout: true
+    capture_stderr: true
+    outputs:
+      separate:
+        stdout:
+          - type: "file"
+            path: "{{process_id}}_stdout.log"
+            format: "plain"
+        stderr:
+          - type: "file"
+            path: "{{process_id}}_stderr.log"
+            format: "plain"
+"#)
+    } else {
+        String::new()
+    };
+    
     let config_content = format!(r#"
 process_manager:
   port: {}
   log_level: "debug"
-  force_shutdown_timeout: 30s
-
+  force_shutdown_timeout: 30s{}
+{}
 managed_processes:
   - id: "{}"
     enabled: true
@@ -305,7 +410,7 @@ managed_processes:
               max_retries: 5
               retry_delay: 1s
               backoff_rate: 1.0{}{}
-"#, config_overrides.port, process_id, testexe_str, args, graceful_timeout, resource_limits, health_check_section);
+"#, config_overrides.port, base_directory_section, log_collection_section, process_id, testexe_str, args, graceful_timeout, resource_limits, health_check_section);
     
     fs::write(&config_path, config_content)
         .map_err(|e| format!("Failed to write config file: {}", e))?;

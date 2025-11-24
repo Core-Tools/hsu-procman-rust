@@ -26,6 +26,12 @@ pub struct ProcessManagerOptions {
         with = "duration_serde"
     )]
     pub force_shutdown_timeout: Duration,
+    
+    /// Optional base directory override for PID files and log files
+    /// When specified, all PID files and log files will be placed under this directory
+    /// This is particularly useful for E2E tests to isolate artifacts
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub base_directory: Option<String>,
 }
 
 /// Individual process configuration (matches Go's ProcessConfig)
