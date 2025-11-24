@@ -5,12 +5,12 @@
 //!
 //! ## Test Scenario
 //!
-//! 1. Start TESTEXE with HTTP health server (port 18080)
-//! 2. Configure to fail health checks after 5 seconds
-//! 3. Wait for initial health checks to pass
-//! 4. Wait for health to start failing (returns 503)
-//! 5. Verify restart triggered after 3 consecutive failures
-//! 6. Verify new instance spawned (spawn count = 2+)
+//! 1. Start TESTEXE with HTTP health server (port 18080, configured to fail after 5s)
+//! 2. Wait for initial health checks to pass
+//! 3. Wait for health checks to start failing (returns 503 after 5s)
+//! 4. Wait for restart trigger (after 3 consecutive failures)
+//! 5. Verify second instance is running with passing health checks
+//! 6. Verify PID files are cleaned up (proves no zombies)
 //!
 //! ## Expected Results
 //!
@@ -22,6 +22,7 @@
 //! - Process restarted successfully
 //! - Second instance spawned
 //! - Circuit breaker reset on recovery
+//! - **PID files are cleaned up** (proves no zombies)
 //!
 //! ## Key Observations
 //!
@@ -119,7 +120,7 @@
 
 use e2e_tests::TestExecutor;
 use e2e_tests::process_manager::TestConfigOptions;
-use e2e_tests::assertions::assert_process_started;
+use e2e_tests::assertions::{assert_process_started, assert_pid_directory_empty_in_dir};
 use std::time::Duration;
 use std::thread;
 
@@ -269,6 +270,13 @@ fn test_http_health_restart() {
         
         Ok(())
     });
+    
+    // Verify PID file cleanup after test completes
+    println!("\nStep 6: Verifying PID file cleanup (proves no zombies)...");
+    if let Ok(()) = result {
+        assert_pid_directory_empty_in_dir(&executor.test_dir)
+            .unwrap_or_else(|e| panic!("{}", e));
+    }
     
     match result {
         Ok(()) => {

@@ -7,20 +7,21 @@
 //!
 //! 1. Start TESTEXE as a managed process
 //! 2. Wait for process to be running and healthy
-//! 3. Let process run for 2 seconds (verify stability)
+//! 3. Let process run for 1 second (verify stability)
 //! 4. Send stop signal with very short timeout (100ms)
 //! 5. Verify process is force-killed immediately
-//! 6. Verify PROCMAN shuts down successfully
+//! 6. Verify PID files are cleaned up (proves no zombies)
 //!
 //! ## Expected Results
 //!
 //! - Process starts successfully and becomes healthy
-//! - Process runs stably for several seconds
-//! - Stop signal sent with minimal timeout
+//! - Process runs stably for 1 second
+//! - Stop signal sent with minimal timeout (100ms)
 //! - Process force-killed when timeout exceeded
 //! - Force termination happens quickly (< 1 second)
 //! - Exit status captured (may show forced termination)
 //! - PROCMAN shuts down cleanly
+//! - **PID files are cleaned up** (proves no zombies)
 //!
 //! ## Key Observations
 //!
@@ -33,6 +34,7 @@
 //! - ✅ Force kill executed (SIGKILL or taskkill /f)
 //! - ✅ Process terminated successfully
 //! - ✅ Quick termination (timeout 100ms + force kill)
+//! - ✅ **PID file cleanup** (absence proves no zombies)
 //!
 //! ## Detailed Flow (Log Lines to Look For)
 //!
@@ -58,6 +60,16 @@
 //! 1. **Force kill works** - Processes can be terminated forcefully
 //! 2. **Timeout enforcement works** - Short timeouts trigger force kill
 //! 3. **Force termination is fast** - No hanging processes
+//! 4. **Process cleanup is complete** - PID files are deleted after `child.wait()` reaps zombies
+//!
+//! ### Why PID File Cleanup Matters
+//!
+//! PID files are deleted AFTER `child.wait()` completes in the exit monitor task.
+//! Since `child.wait()` reaps zombie processes, the absence of PID files proves:
+//! - ✅ Process was properly reaped (no zombie)
+//! - ✅ Exit monitor task completed successfully  
+//! - ✅ Cleanup logic executed in correct order
+//! - ✅ No race conditions in termination flow
 //! 4. **State transitions are correct** - Running → Stopping → Stopped (force)
 //! 5. **No zombie processes** - Clean termination even when forced
 //!
@@ -106,7 +118,7 @@
 
 use e2e_tests::TestExecutor;
 use e2e_tests::process_manager::TestConfigOptions;
-use e2e_tests::assertions::{assert_process_started};
+use e2e_tests::assertions::{assert_process_started, assert_pid_directory_empty_in_dir};
 use std::time::Duration;
 use std::thread;
 
@@ -147,6 +159,13 @@ fn test_forced_stop() {
         
         Ok(())
     });
+    
+    // Verify PID file cleanup after test completes
+    println!("\nStep 4: Verifying PID file cleanup (proves no zombies)...");
+    if let Ok(()) = result {
+        assert_pid_directory_empty_in_dir(&executor.test_dir)
+            .unwrap_or_else(|e| panic!("{}", e));
+    }
     
     match result {
         Ok(()) => {

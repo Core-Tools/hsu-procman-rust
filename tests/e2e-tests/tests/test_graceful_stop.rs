@@ -8,19 +8,20 @@
 //! 1. Start TESTEXE as a managed process
 //! 2. Wait for process to be running and healthy
 //! 3. Let process run for 2 seconds (verify stability)
-//! 4. Send SIGTERM signal via PROCMAN API
-//! 5. Verify process exits cleanly within timeout
-//! 6. Verify PROCMAN shuts down gracefully
+//! 4. PROCMAN sends graceful shutdown signal (Ctrl+Break on Windows, SIGTERM on Unix)
+//! 5. Verify process exits cleanly within timeout (5 seconds)
+//! 6. Verify PID files are cleaned up (proves no zombies)
 //!
 //! ## Expected Results
 //!
 //! - Process starts successfully and becomes healthy
-//! - Process runs stably for several seconds
-//! - SIGTERM signal sent successfully
+//! - Process runs stably for 2 seconds
+//! - Graceful termination signal sent successfully (Ctrl+Break/SIGTERM)
 //! - Process terminates within graceful timeout (5 seconds)
 //! - No forced kill required
 //! - Exit status captured correctly
 //! - PROCMAN shuts down cleanly
+//! - **PID files are cleaned up** (proves no zombies)
 //!
 //! ## Key Observations
 //!
@@ -28,11 +29,12 @@
 //!
 //! - ✅ Process spawn confirmation
 //! - ✅ Health checks passing (process is stable)
-//! - ✅ Termination signal sent (SIGTERM or taskkill /t on Windows)
+//! - ✅ Termination signal sent (Ctrl+Break on Windows, SIGTERM on Unix)
 //! - ✅ Graceful shutdown initiated
 //! - ✅ Process terminated successfully message
 //! - ✅ NO "force kill" or "timeout" messages
 //! - ✅ Exit monitor completion
+//! - ✅ **PID file cleanup** (absence proves no zombies)
 //!
 //! ## Detailed Flow (Log Lines to Look For)
 //!
@@ -56,10 +58,11 @@
 //! This test confirms that:
 //!
 //! 1. **Graceful shutdown works** - Processes can be stopped cleanly
-//! 2. **Signal handling is correct** - SIGTERM (Unix) / taskkill (Windows) work
+//! 2. **Signal handling is correct** - SIGTERM (Unix) / Ctrl+Break (Windows) work
 //! 3. **Timeout mechanism works** - Waits for graceful exit before force kill
 //! 4. **State transitions are correct** - Running → Stopping → Stopped
 //! 5. **No resource leaks** - Process cleanup is complete
+//! 6. **Process cleanup is complete** - PID files are deleted after `child.wait()` reaps zombies
 //!
 //! ## Platform Differences
 //!
@@ -69,9 +72,9 @@
 //! - Default 5 second timeout before `SIGKILL` (9)
 //!
 //! ### Windows
-//! - Uses `taskkill /t /pid XXXXX` (terminate process tree)
-//! - Sends `WM_CLOSE` to console applications
-//! - Falls back to `taskkill /f` (force) if timeout exceeded
+//! - Uses `GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT)` for graceful termination
+//! - Sends Ctrl+Break signal to process group (with CREATE_NEW_PROCESS_GROUP isolation)
+//! - Falls back to `taskkill /F` (force) if timeout exceeded
 //!
 //! ## Test Artifacts
 //!
@@ -95,7 +98,7 @@
 
 use e2e_tests::TestExecutor;
 use e2e_tests::process_manager::TestConfigOptions;
-use e2e_tests::assertions::assert_process_started;
+use e2e_tests::assertions::{assert_process_started, assert_pid_directory_empty_in_dir};
 use std::time::Duration;
 use std::thread;
 
@@ -134,6 +137,13 @@ fn test_graceful_stop() {
         
         Ok(())
     });
+    
+    // Verify PID file cleanup after test completes
+    println!("\nStep 4: Verifying PID file cleanup (proves no zombies)...");
+    if let Ok(()) = result {
+        assert_pid_directory_empty_in_dir(&executor.test_dir)
+            .unwrap_or_else(|e| panic!("{}", e));
+    }
     
     match result {
         Ok(()) => {

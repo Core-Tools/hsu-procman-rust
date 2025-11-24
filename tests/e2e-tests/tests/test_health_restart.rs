@@ -7,12 +7,10 @@
 //!
 //! 1. Start TESTEXE configured to exit after 3 seconds
 //! 2. Wait for first instance to start and become healthy
-//! 3. Wait for process to exit (after 3 seconds)
-//! 4. Verify PROCMAN detects the exit
-//! 5. Verify restart policy triggers automatic restart
-//! 6. Wait for second instance to spawn
-//! 7. Verify restart counter incremented
-//! 8. Verify both instances logged spawn events
+//! 3. Wait for process to exit (after ~4 seconds with buffer)
+//! 4. Wait for PROCMAN to automatically restart TESTEXE (~3 more seconds)
+//! 5. Verify second instance is running (spawn count = 2)
+//! 6. Verify PID files are cleaned up (proves no zombies)
 //!
 //! ## Expected Results
 //!
@@ -25,6 +23,7 @@
 //! - Second process instance spawned automatically
 //! - Restart counter shows 1 restart
 //! - Process spawn count = 2 (original + 1 restart)
+//! - **PID files are cleaned up** (proves no zombies)
 //!
 //! ## Key Observations
 //!
@@ -39,6 +38,7 @@
 //! - ✅ Second process spawn confirmation
 //! - ✅ Restart counter incremented
 //! - ✅ Circuit breaker reset after successful restart
+//! - ✅ **PID file cleanup** (absence proves no zombies from either instance)
 //!
 //! ## Detailed Flow (Log Lines to Look For)
 //!
@@ -79,6 +79,7 @@
 //! 5. **Restart counter works** - Tracks number of restarts
 //! 6. **Circuit breaker resets** - State cleaned for new instance
 //! 7. **State machine transitions** - Running → Failed → Starting → Running
+//! 8. **Process cleanup is complete** - PID files deleted after each instance terminates
 //!
 //! ## Restart Policy Configuration
 //!
@@ -134,7 +135,7 @@
 
 use e2e_tests::TestExecutor;
 use e2e_tests::process_manager::TestConfigOptions;
-use e2e_tests::assertions::assert_process_started;
+use e2e_tests::assertions::{assert_process_started, assert_pid_directory_empty_in_dir};
 use std::time::Duration;
 use std::thread;
 
@@ -225,6 +226,13 @@ fn test_health_restart() {
         
         Ok(())
     });
+    
+    // Verify PID file cleanup after test completes
+    println!("\nStep 5: Verifying PID file cleanup (proves no zombies)...");
+    if let Ok(()) = result {
+        assert_pid_directory_empty_in_dir(&executor.test_dir)
+            .unwrap_or_else(|e| panic!("{}", e));
+    }
     
     match result {
         Ok(()) => {

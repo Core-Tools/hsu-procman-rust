@@ -6,18 +6,19 @@
 //! ## Test Scenario
 //!
 //! 1. Start TESTEXE with log collection enabled
-//! 2. Wait for process to start
-//! 3. Wait for process to produce output
-//! 4. Check for log directory creation
-//! 5. Graceful shutdown
+//! 2. Wait for process to produce logs
+//! 3. Check for log files (aggregated log file with actual content)
+//! 4. Graceful shutdown
+//! 5. Verify PID files are cleaned up (proves no zombies)
 //!
 //! ## Expected Results
 //!
 //! - Process starts successfully
 //! - TESTEXE produces output (visible in PROCMAN logs)
 //! - Test framework works correctly
-//! - Log directory created (when full integration complete)
+//! - Log directory created with aggregated log file containing actual content
 //! - Graceful shutdown works
+//! - **PID files are cleaned up** (proves no zombies)
 //!
 //! ## Key Observations
 //!
@@ -26,8 +27,9 @@
 //! - ✅ Process spawn confirmation in PROCMAN logs
 //! - ✅ Health check activity indicating process is running
 //! - ✅ TESTEXE output visible in process manager logs
-//! - ⏳ Log files created in configured directory (pending full integration)
+//! - ✅ Log files created in configured directory with actual content
 //! - ✅ Clean shutdown without errors
+//! - ✅ **PID file cleanup** (absence proves no zombies)
 //!
 //! ## Detailed Flow (Log Lines to Look For)
 //!
@@ -72,7 +74,7 @@
 
 use e2e_tests::TestExecutor;
 use e2e_tests::process_manager::TestConfigOptions;
-use e2e_tests::assertions::assert_process_started;
+use e2e_tests::assertions::{assert_process_started, assert_pid_directory_empty_in_dir};
 use std::time::Duration;
 use std::thread;
 
@@ -175,6 +177,13 @@ fn test_log_collection() {
         
         Ok(())
     });
+    
+    // Verify PID file cleanup after test completes
+    println!("\nStep 5: Verifying PID file cleanup (proves no zombies)...");
+    if let Ok(()) = result {
+        assert_pid_directory_empty_in_dir(&executor.test_dir)
+            .unwrap_or_else(|e| panic!("{}", e));
+    }
     
     match result {
         Ok(()) => {

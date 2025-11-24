@@ -168,3 +168,92 @@ pub fn assert_logs_not_contain(procman: &ProcessManagerWrapper, pattern: &str) -
     }
 }
 
+/// Assert that PID files have been cleaned up (proves no zombies)
+/// 
+/// PID files are deleted AFTER child.wait() completes, which reaps zombies.
+/// If PID files are absent, it proves processes exited cleanly with no zombies.
+/// 
+/// # Arguments
+/// * `procman` - The process manager wrapper
+/// * `process_id` - The process ID to check (e.g., "testexe")
+/// 
+/// # Returns
+/// * `Ok(())` if no PID file exists (clean termination)
+/// * `Err(msg)` if PID file still exists (indicates incomplete termination or zombie)
+pub fn assert_no_pid_file(procman: &ProcessManagerWrapper, process_id: &str) -> Result<(), String> {
+    assert_no_pid_file_in_dir(&procman.test_dir, process_id)
+}
+
+/// Assert that a specific PID file doesn't exist in the given test directory
+/// 
+/// This is a lower-level version that works with just a Path, useful for
+/// checking after a test completes and the wrapper is no longer available.
+pub fn assert_no_pid_file_in_dir(test_dir: &Path, process_id: &str) -> Result<(), String> {
+    let pid_dir = test_dir.join("hsu-procman");
+    let pid_file = pid_dir.join(format!("{}.pid", process_id));
+    
+    if !pid_file.exists() {
+        println!("✓ PID file cleaned up: {} (proves clean termination)", pid_file.display());
+        Ok(())
+    } else {
+        // Try to read the PID file to provide more debugging info
+        let pid_content = fs::read_to_string(&pid_file)
+            .unwrap_or_else(|_| "<unreadable>".to_string());
+        
+        Err(format!(
+            "PID file still exists: {}\nContent: {}\n\
+             This indicates the process may not have terminated cleanly or a zombie may exist.\n\
+             PID files are deleted AFTER child.wait() completes, so presence indicates incomplete termination.",
+            pid_file.display(),
+            pid_content.trim()
+        ))
+    }
+}
+
+/// Assert that the PID directory is empty (all PID files cleaned up)
+/// 
+/// This is a stronger check that verifies ALL managed processes have been cleaned up.
+/// Useful for testing complete shutdown scenarios.
+pub fn assert_pid_directory_empty(procman: &ProcessManagerWrapper) -> Result<(), String> {
+    assert_pid_directory_empty_in_dir(&procman.test_dir)
+}
+
+/// Assert that the PID directory is empty in the given test directory
+/// 
+/// This is a lower-level version that works with just a Path, useful for
+/// checking after a test completes and the wrapper is no longer available.
+pub fn assert_pid_directory_empty_in_dir(test_dir: &Path) -> Result<(), String> {
+    let pid_dir = test_dir.join("hsu-procman");
+    
+    if !pid_dir.exists() {
+        println!("✓ PID directory doesn't exist: {} (no PID files created, or fully cleaned)", pid_dir.display());
+        return Ok(());
+    }
+    
+    // Read directory contents
+    let entries: Vec<_> = fs::read_dir(&pid_dir)
+        .map_err(|e| format!("Failed to read PID directory: {}", e))?
+        .filter_map(|e| e.ok())
+        .filter(|e| {
+            // Filter for .pid files only
+            e.path().extension().and_then(|ext| ext.to_str()) == Some("pid")
+        })
+        .collect();
+    
+    if entries.is_empty() {
+        println!("✓ PID directory is empty: {} (all processes terminated cleanly)", pid_dir.display());
+        Ok(())
+    } else {
+        let pid_files: Vec<String> = entries.iter()
+            .map(|e| e.file_name().to_string_lossy().to_string())
+            .collect();
+        
+        Err(format!(
+            "PID directory is not empty: {}\nRemaining PID files: {:?}\n\
+             This indicates some processes did not terminate cleanly.",
+            pid_dir.display(),
+            pid_files
+        ))
+    }
+}
+
