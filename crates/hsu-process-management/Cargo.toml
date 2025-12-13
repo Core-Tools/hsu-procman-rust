@@ -5,6 +5,12 @@ edition.workspace = true
 authors.workspace = true
 license.workspace = true
 
+[features]
+# Exactly one of these must be enabled (enforced in src/lib.rs).
+procman-v1 = []
+procman-v2 = []
+default = ["procman-v2"]
+
 [dependencies]
 # Async runtime
 tokio = { workspace = true }
@@ -38,6 +44,9 @@ dashmap = { workspace = true }
 
 # Async traits
 async-trait = { workspace = true }
+
+# Futures extensions
+futures = "0.3"
 
 # Internal dependencies - common & module communication
 hsu-common = { path = "../hsu-common" }

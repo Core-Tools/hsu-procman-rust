@@ -462,7 +462,10 @@ impl ProcessManager {
     }
 
     /// Get information about all processes
-    pub async fn get_all_process_info(&self) -> Vec<ProcessInfo> {
+    ///
+    /// Fail-fast: if any individual `get_process_info(id)` call returns an error,
+    /// this method returns that error immediately.
+    pub async fn get_all_process_info(&self) -> Result<Vec<ProcessInfo>> {
         // Collect process IDs first
         let process_ids: Vec<String> = {
             let processes = self.processes.read().await;
@@ -472,12 +475,11 @@ impl ProcessManager {
         // Then get info for each (lock is released between iterations)
         let mut info_list = Vec::new();
         for process_id in process_ids {
-            if let Ok(info) = self.get_process_info(&process_id).await {
-                info_list.push(info);
-            }
+            let info = self.get_process_info(&process_id).await?;
+            info_list.push(info);
         }
 
-        info_list
+        Ok(info_list)
     }
 
     /// Get the current manager state

@@ -4,6 +4,13 @@ version = "0.1.0"
 edition = "2021"
 publish = false
 
+[features]
+# Select which ProcessManager implementation to run in the E2E suite.
+# Exactly one must be enabled (enforced by hsu-process-management and e2e-tests/src/lib.rs).
+procman-v1 = ["hsu-process-management/procman-v1"]
+procman-v2 = ["hsu-process-management/procman-v2"]
+default = ["procman-v2"]
+
 [dependencies]
 wait-timeout = "0.2"
 
@@ -18,6 +25,8 @@ nix = { version = "0.27", features = ["signal", "process"] }
 [dev-dependencies]
 # Test framework
 tokio = { version = "1.40", features = ["full"] }
+futures = "0.3"
+hsu-process-management = { path = "../../crates/hsu-process-management", default-features = false }
 
 [[test]]
 name = "e2e_tests"

@@ -203,7 +203,7 @@ impl<T> ResultExt<T> for Result<T> {
 // ==============================================================================
 
 /// Process-specific error types for process management.
-#[derive(Error, Debug)]
+#[derive(Error, Debug, Clone)]
 pub enum ProcessError {
     #[error("Process not found: {id}")]
     NotFound { id: String },
@@ -271,6 +271,15 @@ pub enum ProcessError {
 
     #[error("Process gRPC error: {id} - {reason}")]
     GrpcError { id: String, reason: String },
+
+    #[error("Operation queue full for process '{id}' (limit: {limit})")]
+    QueueFull { id: String, limit: usize },
+
+    #[error("Task panicked for process '{id}': {message}")]
+    TaskPanic { id: String, message: String },
+
+    #[error("Completion channel closed unexpectedly for process '{id}'")]
+    CompletionChannelClosed { id: String },
 }
 
 impl ProcessError {
@@ -332,6 +341,24 @@ impl ProcessError {
             operation: operation.into(),
             state: state.into(),
         }
+    }
+
+    pub fn queue_full(id: impl Into<String>, limit: usize) -> Self {
+        Self::QueueFull {
+            id: id.into(),
+            limit,
+        }
+    }
+
+    pub fn task_panic(id: impl Into<String>, message: impl Into<String>) -> Self {
+        Self::TaskPanic {
+            id: id.into(),
+            message: message.into(),
+        }
+    }
+
+    pub fn completion_channel_closed(id: impl Into<String>) -> Self {
+        Self::CompletionChannelClosed { id: id.into() }
     }
 }
 

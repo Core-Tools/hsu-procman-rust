@@ -12,3 +12,6 @@ mod test_http_health;
 // Phase 3: Resource Limits
 mod test_memory_limit;
 
+// Performance: procman-v1 vs procman-v2 comparison
+mod perf_procman_v1_vs_v2;
+

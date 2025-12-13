@@ -12,6 +12,22 @@ pub use log_parser::LogParser;
 use std::path::PathBuf;
 use std::env;
 
+// -----------------------------------------------------------------------------
+// ProcessManager implementation selection (procman-v1 vs procman-v2)
+// -----------------------------------------------------------------------------
+
+#[cfg(all(feature = "procman-v1", feature = "procman-v2"))]
+compile_error!(
+    "Exactly one procman feature must be enabled for e2e-tests: enable either \
+     `procman-v1` or `procman-v2` (default)."
+);
+
+#[cfg(not(any(feature = "procman-v1", feature = "procman-v2")))]
+compile_error!(
+    "No procman feature selected for e2e-tests: enable `procman-v2` (default) \
+     or explicitly enable `procman-v1`."
+);
+
 /// Get the path to the PROCMAN (hsu-process-manager) binary
 pub fn get_procman_path() -> PathBuf {
     let mut path = env::current_exe()

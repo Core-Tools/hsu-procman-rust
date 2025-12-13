@@ -442,7 +442,9 @@ dependencies = [
 name = "e2e-tests"
 version = "0.1.0"
 dependencies = [
+ "futures",
  "hsu-process",
+ "hsu-process-management",
  "nix",
  "tokio",
  "wait-timeout",
@@ -778,6 +780,7 @@ dependencies = [
  "axum 0.7.9",
  "chrono",
  "dashmap",
+ "futures",
  "hsu-common",
  "hsu-log-collection",
  "hsu-managed-process",
