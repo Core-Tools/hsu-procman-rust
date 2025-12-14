@@ -15,21 +15,12 @@ default = ["procman-v2"]
 # Async runtime
 tokio = { workspace = true }
 
-# HTTP server
-axum = { workspace = true }
-tower = { workspace = true }
-
-# gRPC
-tonic = { workspace = true }
-prost = { workspace = true }
-
 # Serialization
 serde = { workspace = true }
 serde_json = { workspace = true }
 serde_yaml = "0.9"
 
 # Error handling
-thiserror = { workspace = true }
 anyhow = { workspace = true }
 
 # Date/time
@@ -37,10 +28,6 @@ chrono = { workspace = true }
 
 # Logging
 tracing = { workspace = true }
-
-# Utilities
-uuid = { workspace = true }
-dashmap = { workspace = true }
 
 # Async traits
 async-trait = { workspace = true }
@@ -61,7 +48,7 @@ hsu-log-collection = { path = "../hsu-log-collection" }
 hsu-managed-process = { path = "../hsu-managed-process" }
 
 [target.'cfg(unix)'.dependencies]
-nix = { version = "0.27", features = ["signal"] }
+nix = { version = "0.30.1", features = ["signal"] }
 
 [dev-dependencies]
 tempfile = "3.8"

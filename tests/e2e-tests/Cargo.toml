@@ -27,8 +27,29 @@ nix = { version = "0.27", features = ["signal", "process"] }
 tokio = { version = "1.40", features = ["full"] }
 futures = "0.3"
 hsu-process-management = { path = "../../crates/hsu-process-management", default-features = false }
+hsu-common = { path = "../../crates/hsu-common" }
 
 [[test]]
 name = "e2e_tests"
 path = "tests/mod.rs"
+
+[[test]]
+name = "perf_concurrent_ops_isolation"
+path = "tests/perf_concurrent_ops_isolation.rs"
+
+[[test]]
+name = "perf_hot_process_isolation"
+path = "tests/perf_hot_process_isolation.rs"
+
+[[test]]
+name = "perf_read_heavy_write_heavy"
+path = "tests/perf_read_heavy_write_heavy.rs"
+
+[[test]]
+name = "perf_cancellation_semantics"
+path = "tests/perf_cancellation_semantics.rs"
+
+[[test]]
+name = "perf_procman_v1_vs_v2"
+path = "tests/perf_procman_v1_vs_v2.rs"
 

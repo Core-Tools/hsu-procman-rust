@@ -474,12 +474,17 @@ impl ProcessControlImpl {
                 }
             }
         } else {
-            // Fallback: poll PID existence.
-            match timeout(timeout_dur, Self::poll_pid_until_exit(pid)).await {
-                Ok(Ok(())) => Ok(true),
-                Ok(Err(e)) => Err(e),
-                Err(_) => Ok(false),
-            }
+            // Invariant: once we track a PID for a spawned child, `spawn_exit_monitor_task()`
+            // must have been called and `exit_monitor_task` must exist. The monitor owns the
+            // `Child` handle and provides the strongest exit confirmation (PID reuse is possible).
+            //
+            // If we ever reach this branch, it indicates an internal lifecycle bug (e.g. partial
+            // start, lost monitor task). Prefer failing fast to avoid relying on weak PID polling.
+            unreachable!(
+                "exit monitor task is missing while confirming exit for process '{}' (pid={}); invariant violation",
+                self.config.id,
+                pid
+            );
         }
     }
 
