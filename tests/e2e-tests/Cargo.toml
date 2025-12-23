@@ -4,6 +4,13 @@ version = "0.1.0"
 edition = "2021"
 publish = false
 
+[features]
+# Select which ProcessManager implementation to run in the E2E suite.
+# Exactly one must be enabled (enforced by hsu-process-management and e2e-tests/src/lib.rs).
+procman-v1 = ["hsu-process-management/procman-v1"]
+procman-v2 = ["hsu-process-management/procman-v2"]
+default = ["procman-v2"]
+
 [dependencies]
 wait-timeout = "0.2"
 
@@ -18,8 +25,31 @@ nix = { version = "0.27", features = ["signal", "process"] }
 [dev-dependencies]
 # Test framework
 tokio = { version = "1.40", features = ["full"] }
+futures = "0.3"
+hsu-process-management = { path = "../../crates/hsu-process-management", default-features = false }
+hsu-common = { path = "../../crates/hsu-common" }
 
 [[test]]
 name = "e2e_tests"
 path = "tests/mod.rs"
+
+[[test]]
+name = "perf_concurrent_ops_isolation"
+path = "tests/perf_concurrent_ops_isolation.rs"
+
+[[test]]
+name = "perf_hot_process_isolation"
+path = "tests/perf_hot_process_isolation.rs"
+
+[[test]]
+name = "perf_read_heavy_write_heavy"
+path = "tests/perf_read_heavy_write_heavy.rs"
+
+[[test]]
+name = "perf_cancellation_semantics"
+path = "tests/perf_cancellation_semantics.rs"
+
+[[test]]
+name = "perf_procman_v1_vs_v2"
+path = "tests/perf_procman_v1_vs_v2.rs"
 

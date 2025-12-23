@@ -1,6 +1,8 @@
 use clap::Parser;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::time::SystemTime;
 use std::time::Duration;
 use tokio::time::{sleep, interval};
 use tracing::{info, warn, error, debug};
@@ -53,6 +55,28 @@ struct Args {
     /// CPU percentage to use (0-100)
     #[arg(long, default_value = "0")]
     cpu_percent: u32,
+
+    /// If provided, write this file once the program is fully operational.
+    /// The file will be removed on shutdown (best-effort).
+    #[arg(long)]
+    ready_file: Option<PathBuf>,
+
+    /// If provided, write this file as soon as a shutdown signal/event is received.
+    /// This happens BEFORE stop-block delay is applied and before the shutdown flag is set.
+    #[arg(long)]
+    signal_ack_file: Option<PathBuf>,
+
+    /// If provided, after receiving a shutdown signal/event, wait until this file exists
+    /// before proceeding with shutdown. This enables deterministic E2E tests.
+    ///
+    /// The gate file is NOT deleted on shutdown.
+    #[arg(long)]
+    shutdown_gate_file: Option<PathBuf>,
+
+    /// If provided and > 0: when shutdown signal is received, block for this many
+    /// milliseconds BEFORE setting the shutdown flag to true.
+    #[arg(long, default_value = "0")]
+    stop_block_ms: u64,
 }
 
 #[tokio::main]
@@ -83,16 +107,60 @@ async fn main() {
 
     #[cfg(windows)]
     {
-        if let Err(e) = setup_windows_signal_handler(shutdown_clone) {
+        let shutdown_requested = Arc::new(AtomicBool::new(false));
+        let shutdown_requested_clone = shutdown_requested.clone();
+
+        if let Err(e) = setup_windows_signal_handler(shutdown_requested_clone) {
             error!("Failed to setup signal handler: {}", e);
             std::process::exit(1);
         }
+
+        // On Windows, we do not block inside the OS callback. Instead we set a
+        // "shutdown requested" flag and let the main loop apply stop-block delay
+        // before setting `shutdown = true`.
+        let stop_block_ms = args.stop_block_ms;
+        let signal_ack_file = args.signal_ack_file.clone();
+        let shutdown_gate_file = args.shutdown_gate_file.clone();
+        tokio::spawn(async move {
+            wait_for_shutdown(shutdown_requested).await;
+            info!("Testexe received signal");
+
+            if let Some(path) = &signal_ack_file {
+                if let Err(e) = atomic_write_text(path, "ack\n") {
+                    error!(
+                        "Failed to write signal ack file {}: {}",
+                        path.display(),
+                        e
+                    );
+                } else {
+                    info!("Wrote signal ack file: {}", path.display());
+                }
+            }
+
+            if let Some(path) = &shutdown_gate_file {
+                info!("Shutdown gate: waiting for {}", path.display());
+                wait_for_file_exists(path).await;
+                info!("Shutdown gate opened: {}", path.display());
+            }
+
+            if stop_block_ms > 0 {
+                info!(
+                    "Stop-block: waiting {}ms before setting shutdown flag",
+                    stop_block_ms
+                );
+                sleep(Duration::from_millis(stop_block_ms)).await;
+            }
+            shutdown_clone.store(true, Ordering::Relaxed);
+        });
     }
 
     #[cfg(unix)]
     {
+        let stop_block_ms = args.stop_block_ms;
+        let signal_ack_file = args.signal_ack_file.clone();
+        let shutdown_gate_file = args.shutdown_gate_file.clone();
         tokio::spawn(async move {
-            setup_unix_signal_handler(shutdown_clone).await;
+            setup_unix_signal_handler(shutdown_clone, stop_block_ms, signal_ack_file, shutdown_gate_file).await;
         });
     }
 
@@ -113,6 +181,15 @@ async fn main() {
     info!("Testexe is ready, starting managed processes...");
     sleep(Duration::from_millis(100)).await;
     info!("Testexe is fully operational");
+
+    // Write ready file if requested (right after "fully operational" log).
+    if let Some(path) = &args.ready_file {
+        if let Err(e) = atomic_write_text(path, "ready\n") {
+            error!("Failed to write ready file {}: {}", path.display(), e);
+            std::process::exit(1);
+        }
+        info!("Wrote ready file: {}", path.display());
+    }
 
     // Start health check server if requested
     let health_task = if let Some(port) = args.health_port {
@@ -177,7 +254,9 @@ async fn main() {
                 }
             }
             _ = wait_for_shutdown(shutdown.clone()) => {
-                info!("Testexe received signal");
+                if !cfg!(windows) {
+                    info!("Testexe received signal");
+                }
                 break;
             }
         }
@@ -204,6 +283,26 @@ async fn main() {
         }
     }
 
+    // Clean up ready file (best-effort)
+    if let Some(path) = &args.ready_file {
+        if let Err(e) = std::fs::remove_file(path) {
+            // Ignore if it doesn't exist
+            if e.kind() != std::io::ErrorKind::NotFound {
+                warn!("Failed to remove ready file {}: {}", path.display(), e);
+            }
+        }
+    }
+
+    // Clean up signal ack file (best-effort)
+    if let Some(path) = &args.signal_ack_file {
+        if let Err(e) = std::fs::remove_file(path) {
+            // Ignore if it doesn't exist
+            if e.kind() != std::io::ErrorKind::NotFound {
+                warn!("Failed to remove signal ack file {}: {}", path.display(), e);
+            }
+        }
+    }
+
     info!("Testexe stopped");
     std::process::exit(args.exit_code);
 }
@@ -224,14 +323,56 @@ fn write_pid_file(path: &str) -> std::io::Result<()> {
     std::fs::write(path, pid.to_string())
 }
 
+fn atomic_write_text(path: &Path, contents: &str) -> std::io::Result<()> {
+    if let Some(parent) = path.parent() {
+        std::fs::create_dir_all(parent)?;
+    }
+
+    let pid = std::process::id();
+    let nanos = SystemTime::now()
+        .duration_since(SystemTime::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_nanos();
+
+    let file_name = path
+        .file_name()
+        .map(|s| s.to_string_lossy().to_string())
+        .unwrap_or_else(|| "ready".to_string());
+
+    let tmp_path = path.with_file_name(format!("{file_name}.tmp-{pid}-{nanos}"));
+
+    std::fs::write(&tmp_path, contents)?;
+
+    // `rename` is atomic when source+dest are on the same filesystem.
+    // On Windows, rename over an existing file can fail, so we remove first.
+    #[cfg(windows)]
+    {
+        let _ = std::fs::remove_file(path);
+    }
+
+    std::fs::rename(&tmp_path, path)?;
+    Ok(())
+}
+
 async fn wait_for_shutdown(shutdown: Arc<AtomicBool>) {
     while !shutdown.load(Ordering::Relaxed) {
         sleep(Duration::from_millis(100)).await;
     }
 }
 
+async fn wait_for_file_exists(path: &Path) {
+    while tokio::fs::metadata(path).await.is_err() {
+        sleep(Duration::from_millis(25)).await;
+    }
+}
+
 #[cfg(unix)]
-async fn setup_unix_signal_handler(shutdown: Arc<AtomicBool>) {
+async fn setup_unix_signal_handler(
+    shutdown: Arc<AtomicBool>,
+    stop_block_ms: u64,
+    signal_ack_file: Option<PathBuf>,
+    shutdown_gate_file: Option<PathBuf>,
+) {
     use tokio::signal::unix::{signal, SignalKind};
 
     let mut sigterm = signal(SignalKind::terminate()).expect("Failed to setup SIGTERM handler");
@@ -240,17 +381,49 @@ async fn setup_unix_signal_handler(shutdown: Arc<AtomicBool>) {
     tokio::select! {
         _ = sigterm.recv() => {
             info!("Received SIGTERM");
+            if let Some(path) = &signal_ack_file {
+                if let Err(e) = atomic_write_text(path, "ack\n") {
+                    error!("Failed to write signal ack file {}: {}", path.display(), e);
+                } else {
+                    info!("Wrote signal ack file: {}", path.display());
+                }
+            }
+            if let Some(path) = &shutdown_gate_file {
+                info!("Shutdown gate: waiting for {}", path.display());
+                wait_for_file_exists(path).await;
+                info!("Shutdown gate opened: {}", path.display());
+            }
+            if stop_block_ms > 0 {
+                info!("Stop-block: waiting {}ms before setting shutdown flag", stop_block_ms);
+                sleep(Duration::from_millis(stop_block_ms)).await;
+            }
             shutdown.store(true, Ordering::Relaxed);
         }
         _ = sigint.recv() => {
             info!("Received SIGINT");
+            if let Some(path) = &signal_ack_file {
+                if let Err(e) = atomic_write_text(path, "ack\n") {
+                    error!("Failed to write signal ack file {}: {}", path.display(), e);
+                } else {
+                    info!("Wrote signal ack file: {}", path.display());
+                }
+            }
+            if let Some(path) = &shutdown_gate_file {
+                info!("Shutdown gate: waiting for {}", path.display());
+                wait_for_file_exists(path).await;
+                info!("Shutdown gate opened: {}", path.display());
+            }
+            if stop_block_ms > 0 {
+                info!("Stop-block: waiting {}ms before setting shutdown flag", stop_block_ms);
+                sleep(Duration::from_millis(stop_block_ms)).await;
+            }
             shutdown.store(true, Ordering::Relaxed);
         }
     }
 }
 
 #[cfg(windows)]
-fn setup_windows_signal_handler(shutdown: Arc<AtomicBool>) -> Result<(), Box<dyn std::error::Error>> {
+fn setup_windows_signal_handler(shutdown_requested: Arc<AtomicBool>) -> Result<(), Box<dyn std::error::Error>> {
     use std::sync::Mutex;
     use windows_sys::Win32::Foundation::TRUE;
     use windows_sys::Win32::System::Console::{SetConsoleCtrlHandler, CTRL_C_EVENT, CTRL_BREAK_EVENT};
@@ -259,13 +432,12 @@ fn setup_windows_signal_handler(shutdown: Arc<AtomicBool>) -> Result<(), Box<dyn
     static SHUTDOWN_FLAG: once_cell::sync::Lazy<Mutex<Option<Arc<AtomicBool>>>> = 
         once_cell::sync::Lazy::new(|| Mutex::new(None));
 
-    *SHUTDOWN_FLAG.lock().unwrap() = Some(shutdown);
+    *SHUTDOWN_FLAG.lock().unwrap() = Some(shutdown_requested);
 
     unsafe extern "system" fn handler(ctrl_type: u32) -> i32 {
         match ctrl_type {
             CTRL_C_EVENT | CTRL_BREAK_EVENT => {
                 if let Some(shutdown) = SHUTDOWN_FLAG.lock().unwrap().as_ref() {
-                    info!("Received Windows console control signal");
                     shutdown.store(true, Ordering::Relaxed);
                 }
                 TRUE

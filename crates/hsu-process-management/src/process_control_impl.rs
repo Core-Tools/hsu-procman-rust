@@ -51,6 +51,9 @@ use tokio::sync::{RwLock, Mutex};
 use tokio::time::{timeout, interval, Duration};
 use tracing::{debug, error, info, warn};
 
+const FORCE_KILL_TIMEOUT: Duration = Duration::from_secs(3);
+const EXIT_POLL_INTERVAL: Duration = Duration::from_millis(25);
+
 /// Process control implementation with full lifecycle management
 pub struct ProcessControlImpl {
     /// Process configuration
@@ -260,7 +263,6 @@ impl ProcessControlImpl {
         // 3. Signal interference during process restart cycles
         #[cfg(windows)]
         {
-            use std::os::windows::process::CommandExt;
             const CREATE_NEW_PROCESS_GROUP: u32 = 0x00000200;
             cmd.creation_flags(CREATE_NEW_PROCESS_GROUP);
         }
@@ -385,57 +387,121 @@ impl ProcessControlImpl {
                 }
             }
         }
-        
-        // Wait for exit monitor task to complete (process exited)
-        let shutdown_timeout = self.control_config.graceful_timeout;
-        
-        if let Some(task) = self.exit_monitor_task.take() {
-            match timeout(shutdown_timeout, task).await {
-                Ok(Ok(())) => {
-                    info!("Process {} (PID: {}) terminated gracefully", self.config.id, pid);
-                }
-                Ok(Err(e)) => {
-                    warn!("Exit monitor task panicked for {}: {:?}", self.config.id, e);
+
+        // Wait for process exit (confirmed) with graceful timeout.
+        let graceful_timeout = self.control_config.graceful_timeout;
+        if self.wait_for_exit_confirmed(pid, graceful_timeout).await? {
+            self.pid = None;
+            info!("Process terminated gracefully: {}", self.config.id);
+            return Ok(());
+        }
+
+        warn!(
+            "Graceful shutdown timed out for {} (PID: {}), attempting force kill",
+            self.config.id, pid
+        );
+
+        if !self.control_config.can_terminate {
+            return Err(CommonProcessError::timeout(
+                self.config.id.clone(),
+                "stop (graceful timeout; force kill not supported)",
+            ));
+        }
+
+        // Force kill.
+        if let Err(e) = hsu_process::force_kill(pid) {
+            error!("Force kill failed for {} (PID: {}): {}", self.config.id, pid, e);
+        }
+
+        // Wait for exit again (short timeout). If still not exited, return error.
+        if self.wait_for_exit_confirmed(pid, FORCE_KILL_TIMEOUT).await? {
+            self.pid = None;
+            info!("Process terminated after force kill: {}", self.config.id);
+            return Ok(());
+        }
+
+        Err(CommonProcessError::timeout(
+            self.config.id.clone(),
+            format!(
+                "stop (did not exit after graceful timeout {:?} + force-kill timeout {:?})",
+                graceful_timeout, FORCE_KILL_TIMEOUT
+            ),
+        ))
+    }
+
+    /// Best-effort exit confirmation with a timeout.
+    ///
+    /// Returns `Ok(true)` if the process is confirmed exited within the timeout,
+    /// `Ok(false)` if the timeout elapsed and the process still appears to exist,
+    /// or `Err(_)` if exit status could not be determined.
+    async fn wait_for_exit_confirmed(&mut self, pid: u32, timeout_dur: Duration) -> ProcessResult<bool> {
+        // Prefer the exit monitor task if present (it owns the Child handle and does child.wait()).
+        if let Some(mut task) = self.exit_monitor_task.take() {
+            let res = timeout(timeout_dur, &mut task).await;
+
+            match res {
+                Ok(join_res) => {
+                    // Task finished. If it completed successfully, the child has been waited/reaped,
+                    // which is the strongest exit confirmation we can have (PID reuse is possible,
+                    // so do NOT rely on process_exists() in this success case).
+                    if join_res.is_ok() {
+                        return Ok(true);
+                    }
+
+                    warn!("Exit monitor task join error for {}: {:?}", self.config.id, join_res);
+
+                    // If the monitor failed/panicked, fall back to PID existence check.
+                    match hsu_process::process_exists(pid) {
+                        Ok(true) => Ok(false),
+                        Ok(false) => Ok(true),
+                        Err(e) => Err(CommonProcessError::stop_failed(
+                            self.config.id.clone(),
+                            format!("Failed to confirm exit after monitor error: {}", e),
+                        )),
+                    }
                 }
                 Err(_) => {
-                    warn!("Graceful shutdown timed out for {} (PID: {}), force killing", 
-                          self.config.id, pid);
-                    
-                    // Force kill
-                    #[cfg(unix)]
-                    {
-                        use nix::sys::signal::{kill, Signal};
-                        use nix::unistd::Pid;
-                        
-                        if let Err(e) = kill(Pid::from_raw(pid as i32), Signal::SIGKILL) {
-                            error!("Failed to send SIGKILL to PID {}: {}", pid, e);
-                        }
-                    }
-                    
-                    #[cfg(windows)]
-                    {
-                        // Force terminate using TerminateProcess
-                        // Note: hsu_process::send_termination_signal already tried graceful, so we force it
-                        if let Err(e) = std::process::Command::new("taskkill")
-                            .args(&["/F", "/PID", &pid.to_string()])
-                            .output()
-                        {
-                            error!("Failed to force kill PID {}: {}", pid, e);
-                        }
-                        // Note: We do NOT apply the AttachConsole Dead PID Hack here because:
-                        // 1. It would send console signals to PROCMAN's parent (test runner)
-                        // 2. This causes spurious Ctrl+C events in the test harness
-                        // 3. The hack should ONLY be applied when PROCMAN itself exits (by the test runner)
+                    // Timed out; keep monitoring task for possible later completion.
+                    self.exit_monitor_task = Some(task);
+                    match hsu_process::process_exists(pid) {
+                        Ok(true) => Ok(false),
+                        Ok(false) => Ok(true),
+                        Err(e) => Err(CommonProcessError::stop_failed(
+                            self.config.id.clone(),
+                            format!("Failed to check process existence: {}", e),
+                        )),
                     }
                 }
             }
+        } else {
+            // Invariant: once we track a PID for a spawned child, `spawn_exit_monitor_task()`
+            // must have been called and `exit_monitor_task` must exist. The monitor owns the
+            // `Child` handle and provides the strongest exit confirmation (PID reuse is possible).
+            //
+            // If we ever reach this branch, it indicates an internal lifecycle bug (e.g. partial
+            // start, lost monitor task). Prefer failing fast to avoid relying on weak PID polling.
+            unreachable!(
+                "exit monitor task is missing while confirming exit for process '{}' (pid={}); invariant violation",
+                self.config.id,
+                pid
+            );
         }
-        
-        // Clean up state
-        self.pid = None;
-        
-        info!("Process terminated: {}", self.config.id);
-        Ok(())
+    }
+
+    async fn poll_pid_until_exit(pid: u32) -> ProcessResult<()> {
+        loop {
+            match hsu_process::process_exists(pid) {
+                Ok(false) => return Ok(()),
+                Ok(true) => {}
+                Err(e) => {
+                    return Err(CommonProcessError::stop_failed(
+                        pid.to_string(),
+                        format!("Failed to check process existence: {}", e),
+                    ))
+                }
+            }
+            tokio::time::sleep(EXIT_POLL_INTERVAL).await;
+        }
     }
     
     /// Spawn exit monitor task to prevent zombie processes
@@ -1193,8 +1259,13 @@ impl ProcessControl for ProcessControlImpl {
             executable_path: executable_path.clone(),
             executable_exists: std::path::Path::new(&executable_path).exists(),
             failure_count: {
-                let manager = self.lifecycle_manager.blocking_read();
-                manager.get_restart_stats().consecutive_failures
+                // NOTE: `get_diagnostics()` is a synchronous method (trait requirement),
+                // so we must not block the Tokio runtime thread here. Use a best-effort
+                // snapshot of the lifecycle manager state.
+                self.lifecycle_manager
+                    .try_read()
+                    .map(|m| m.get_restart_stats().consecutive_failures)
+                    .unwrap_or(0)
             },
             last_attempt_time: self.last_restart_time,
             is_healthy: health_status.is_healthy,
@@ -1262,6 +1333,69 @@ impl ProcessControl for ProcessControlImpl {
         }
         
         Ok(restart_count)
+    }
+}
+
+#[cfg(test)]
+mod stop_tests {
+    use super::*;
+    use crate::config::{
+        ExecutionConfig, ManagedProcessControlConfig, ProcessConfig, ProcessManagementConfig,
+        ProcessManagementType, StandardManagedProcessConfig,
+    };
+    use std::collections::HashMap;
+    use hsu_managed_process::ProcessControl;
+
+    fn minimal_control() -> ProcessControlImpl {
+        let config = ProcessConfig {
+            id: "test-process".to_string(),
+            process_type: ProcessManagementType::StandardManaged,
+            profile_type: "test".to_string(),
+            enabled: true,
+            management: ProcessManagementConfig {
+                standard_managed: Some(StandardManagedProcessConfig {
+                    metadata: None,
+                    control: ManagedProcessControlConfig {
+                        execution: ExecutionConfig {
+                            executable_path: "does-not-matter".to_string(),
+                            args: vec![],
+                            working_directory: None,
+                            environment: HashMap::new(),
+                            wait_delay: Duration::from_millis(10),
+                        },
+                        process_file: None,
+                        context_aware_restart: None,
+                        restart_policy: None,
+                        limits: None,
+                        graceful_timeout: Some(Duration::from_millis(100)),
+                        log_collection: None,
+                    },
+                    health_check: None,
+                }),
+                integrated_managed: None,
+                unmanaged: None,
+            },
+        };
+
+        let control_config = ProcessControlConfig {
+            process_id: "test-process".to_string(),
+            can_attach: false,
+            can_terminate: true,
+            can_restart: true,
+            graceful_timeout: Duration::from_millis(100),
+            process_profile_type: "test".to_string(),
+            log_collection_service: None,
+            log_config: None,
+        };
+
+        ProcessControlImpl::new(config, control_config)
+    }
+
+    #[tokio::test]
+    async fn stop_is_idempotent_when_not_running() {
+        let mut control = minimal_control();
+        // No pid/child => should be a no-op success.
+        control.stop().await.unwrap();
     }
 }
 
